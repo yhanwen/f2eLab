@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<title>cavasDraw</title>
+		<meta name="description" content="" />
+		<meta name="author" content="杨翰文" />
+		<meta name="viewport" content="width=device-width; initial-scale=1.0" />
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	</head>
+	<body>
+		<div>
+			<header>
+				<h1>canvasDraw</h1>
+			</header>
+			<div>
+				菊花：
+				<canvas id="J_densy" width=30 height=30></canvas>
+				<script type="text/javascript">
+					(function(){
+						var tag = document.getElementById("J_densy"),
+						ctx = tag.getContext("2d"),
+						count = 0,
+						i;
+						//设置填充的颜色
+						//ctx.fillStyle="#ff0000";
+						//设置轮廓颜色
+						//ctx.strokeStyle="#000";
+						//绘制一个矩形
+						//ctx.fillRect(0,0,80,100);
+						//将原点移到中心
+						
+						function drawItem(){
+							ctx.save();
+							ctx.translate(tag.width/2,tag.height/2);
+							ctx.rotate(Math.PI*count/(6));
+							count++;
+							for(i=0; i<12; i++){
+								var color = parseInt(255*(15-i)/15).toString(16);
+								ctx.fillStyle = '#'+color+color+color;
+								ctx.rotate(Math.PI/(6));
+								ctx.fillRect(-0.5,-10,1,6);
+							} 
+							ctx.restore();
+						}
+						setInterval(function(){
+							tag.width = tag.width;
+							drawItem();
+						},80);
+					})();
+				</script>
+			</div>
+			<footer>
+				<p>
+					&copy; Copyright  by 杨翰文
+				</p>
+			</footer>
+		</div>
+	</body>
+</html>
