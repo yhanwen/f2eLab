@@ -16,7 +16,7 @@
 	<body>
 		<div>
 			<header>
-				<h1>canvasDraw</h1>
+				<h1>cavasDraw</h1>
 			</header>
 			<div>
 				菊花：
@@ -26,32 +26,27 @@
 						var tag = document.getElementById("J_densy"),
 						ctx = tag.getContext("2d"),
 						count = 0,
+						edges = 10,
 						i;
-						//设置填充的颜色
-						//ctx.fillStyle="#ff0000";
-						//设置轮廓颜色
-						//ctx.strokeStyle="#000";
-						//绘制一个矩形
-						//ctx.fillRect(0,0,80,100);
-						//将原点移到中心
 						
 						function drawItem(){
 							ctx.save();
 							ctx.translate(tag.width/2,tag.height/2);
-							ctx.rotate(Math.PI*count/(6));
+							ctx.rotate(Math.PI*count/(edges/2));
 							count++;
-							for(i=0; i<12; i++){
-								var color = parseInt(255*(15-i)/15).toString(16);
-								ctx.fillStyle = '#'+color+color+color;
-								ctx.rotate(Math.PI/(6));
-								ctx.fillRect(-0.5,-10,1,6);
+							for(i=0; i<edges; i++){
+								var color = (i)/edges;
+								ctx.fillStyle = "rgba(90,154,214,"+color+")";
+								ctx.rotate(Math.PI/(edges/2));
+								ctx.fillRect(-1,-10,2,5);
 							} 
 							ctx.restore();
 						}
+						drawItem();
 						setInterval(function(){
-							tag.width = tag.width;
-							drawItem();
-						},80);
+							//tag.width = tag.width;
+							
+						},60);
 					})();
 				</script>
 			</div>
