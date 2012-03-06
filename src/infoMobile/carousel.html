@@ -34,7 +34,7 @@
        <div class="content" id="wrapper">
            <div class="scroll-area">
 				<div class="switch-block">
-					<div class="carousel-block" id="carousel">
+					<div class="carousel-block" id="colview">
 					</div>
 				</div>
            </div>
@@ -50,45 +50,87 @@
 	<script type="text/javascript" src="src/iscroll.js"></script>
 	<script type="text/javascript" src="src/layoutHandler.js"></script>
 	<script type="text/javascript" src="src/swipeview.js"></script>
-	<script type="text/javascript" src="src/galleryView.js"></script>
+	<script type="text/javascript" src="src/colView.js"></script>
 	<script type="text/javascript">
 			window.addEventListener("load",function(){
 				new layoutHandler()._init();
-				new galleryView({
-					id:"#carousel",
+				new colView({
+					id:"#colview",
 					data:[
 								{
-									img: 'images/pic01.jpg',
+									img: 'http://img10.360buyimg.com/da/20120228/670_240_EYtPhA.jpg',
 									width: 300,
 									height: 213,
 									desc: 'Piazza del Duomo, Florence, Italy'
 								},
 								{
-									img: 'images/pic02.jpg',
+									img: 'http://img12.360buyimg.com/da/20120305/670_240_MlioNy.jpg',
 									width: 300,
 									height: 164,
 									desc: 'Tuscan Landscape'
 								},
 								{
-									img: 'images/pic03.jpg',
+									img: 'http://img14.360buyimg.com/da/20120306/310_100_vaQWcB.jpg',
 									width: 300,
 									height: 213,
 									desc: 'Colosseo, Rome, Italy'
 								},
 								{
-									img: 'images/pic04.jpg',
+									img: 'http://img02.taobaocdn.com/tps/i2/T1uqCYXiRiXXXXXXXX.jpg_160x160.jpg',
 									width: 147,
 									height: 220,
 									desc: 'Somewhere near Chinatown, San Francisco'
 								},
 								{
-									img: 'images/pic05.jpg',
+									img: 'http://img10.360buyimg.com/da/20120305/310_100_hoqKgX.jpg',
 									width: 300,
 									height: 213,
 									desc: 'Medieval guard tower, Asciano, Siena, Italy'
 								},
 								{
-									img: 'images/pic06.jpg',
+									img: 'http://img12.360buyimg.com/da/20120216/135_392_coBLsK.jpg',
+									width: 165,
+									height: 220,
+									desc: 'Leaning tower, Pisa, Italy'
+								},
+								{
+									img: 'http://img10.360buyimg.com/da/20120305/310_100_hoqKgX.jpg',
+									width: 300,
+									height: 213,
+									desc: 'Medieval guard tower, Asciano, Siena, Italy'
+								},
+								{
+									img: 'http://img12.360buyimg.com/da/20120216/135_392_coBLsK.jpg',
+									width: 165,
+									height: 220,
+									desc: 'Leaning tower, Pisa, Italy'
+								},
+								{
+									img: 'http://img12.360buyimg.com/da/20120216/135_392_coBLsK.jpg',
+									width: 165,
+									height: 220,
+									desc: 'Leaning tower, Pisa, Italy'
+								},
+								{
+									img: 'http://img12.360buyimg.com/da/20120216/135_392_coBLsK.jpg',
+									width: 165,
+									height: 220,
+									desc: 'Leaning tower, Pisa, Italy'
+								},
+								{
+									img: 'http://img12.360buyimg.com/da/20120216/135_392_coBLsK.jpg',
+									width: 165,
+									height: 220,
+									desc: 'Leaning tower, Pisa, Italy'
+								},
+								{
+									img: 'http://img12.360buyimg.com/da/20120216/135_392_coBLsK.jpg',
+									width: 165,
+									height: 220,
+									desc: 'Leaning tower, Pisa, Italy'
+								},
+								{
+									img: 'http://img12.360buyimg.com/da/20120216/135_392_coBLsK.jpg',
 									width: 165,
 									height: 220,
 									desc: 'Leaning tower, Pisa, Italy'

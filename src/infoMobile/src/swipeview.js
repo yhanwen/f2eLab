@@ -335,6 +335,12 @@ var SwipeView = (function(){
 				this.__pos(-this.page * this.pageWidth);
 				return;
 			}
+			if (dist > this.pageWidth) {
+				this.slider.style.webkitTransitionDuration = '300ms';
+				this.x = -this.page * this.pageWidth+this.directionX*(this.snapThreshold+10);
+			}
+			
+			
 
 			this.__checkPosition();
 		},
@@ -348,7 +354,9 @@ var SwipeView = (function(){
 
 			// Flip the page
 			if (this.directionX > 0) {
+				
 				this.page = -Math.ceil(this.x / this.pageWidth);
+				
 				this.currentMasterPage = (this.page + 1) - Math.floor((this.page + 1) / 3) * 3;
 				this.pageIndex = this.pageIndex == 0 ? this.options.numberOfPages - 1 : this.pageIndex - 1;
 
