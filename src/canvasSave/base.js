@@ -31,7 +31,7 @@ function getImages(){
 			        console.debug(ajax); // getting the response
 			    }, false);
 			 	
-			    xhr.open("POST", "cavasDraw.html?id=1", true);
+			    xhr.open("POST", "proxy.php", true);
 			    xhr.setRequestHeader('content-type', 'multipart/form-data; boundary='+ boundary);
 			 
 			    builder = '--' + boundary + '\r\n Content-Disposition: form-data; name="image"; filename="upload.png"\r\n Content-Type: image/png \r\n\r\n'; 

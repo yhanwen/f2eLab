@@ -8,9 +8,13 @@
 		this.step = config.step||2;
 		this.swipe = null;
 		this._buildSwipe();
+		this.scroll = config.scroll;
 	}
 	colView.prototype={
 		constructor:colView,
+		/**
+		 * 使用swipeview初始化
+		 */
 		_buildSwipe:function(){
 			var self = this,
 			len = Math.ceil(this.picData.length/self.step),
@@ -55,6 +59,9 @@
 				});
 			}
 		},
+		/**
+		 * 向masterPage中添加两个item
+		 */
 		_buildCol:function(i){
 			var self = this, 
 			el = document.createElement("div"),
@@ -66,10 +73,14 @@
 			}
 			return el;
 		},
+		/**
+		 * 创建单个item
+		 */
 		_buildItem:function(i,par){
 			var el,page,
 			self = this,
 			slides = self.picData;
+			//如果当前index有数据
 			if(slides[i]){
 				var img = document.createElement("img"),
 				span = document.createElement("div");
@@ -79,21 +90,27 @@
 				el = img;
 				el.style.webkitTransform="translate3d(0,0,0)";
 				self._showLoading(par);
-				
+				el.src="";
 				el.onload = function () { 
 					that = this;
-	
 					self._hideLoading(par);
 					var viewWidth = span.clientWidth,viewHeight = span.clientHeight;
-					that.style.cssText = "-webkit-transform:translate3d("+((viewWidth-that.clientWidth)/2)+"px,"+((viewHeight-that.clientHeight)/2)+"px,0)";
+					//that.style.cssText = "-webkit-transform:translate3d("+((viewWidth-that.clientWidth)/2)+"px,"+((viewHeight-that.clientHeight)/2)+"px,0)";
 	
 				}
 				el.src = slides[i].img;
+				span.addEventListener("click",function(e){
+					e.preventDefault();
+					self._switchBig(this);
+				},false);
 				return span;
 			}else {
 				return false;
 			}
 		},
+		/**
+		 * 显示正在载入动画
+		 */
 		_showLoading:function(obj){
 			var self = this;
 			if(obj.getElementsByTagName("canvas").length!=0){
@@ -128,6 +145,105 @@
 				drawItem();
 			},60);
 		},
+		/**
+		 * 切换到大图
+		 */
+		_switchBig:function(item){
+			var self = this,
+			item = item,
+			docScroll = document.documentElement.scrollTop,
+			itemPos = self._getStartPos(item),
+			cloneItem = item.cloneNode(true),
+			newWrap = document.createElement("div"),
+			img = cloneItem.querySelector("img"),
+			childs = item.parentNode.children,
+			outerWrapper = self.scroll?self.scroll.wrapper:document.body;
+			//设置cloneitem的位置
+			newWrap.className = "popBigPicWrap"
+			cloneItem.style.position = "absolute";
+			cloneItem.style.top = itemPos["top"]+5+"px";
+			cloneItem.style.left = itemPos["left"]-5+"px";
+			cloneItem.style.zIndex = "100";
+			outerWrapper.appendChild(newWrap);
+			newWrap.appendChild(cloneItem);
+			cloneItem.style.webkitTransition = "all 0.6s ease-in-out";
+			item.style.opacity = 0;
+			setTimeout(function(){
+				//img.style.webkitTransform="translate3d(0,0,0)";
+				cloneItem.style.top = 3+"px";
+				cloneItem.style.left = itemPos["outerLeft"]+3+"px";
+				cloneItem.style.width = "280px";
+				cloneItem.style.height = "360px";
+				//cloneItem.style.webkitTransform = 'rotateY(180deg) scaleX('+(280/cloneItem.clientWidth)+') scaleY('+(360/cloneItem.clientHeight)+')';
+				img.style.webkitTransformStyle = "preserve-3d"
+				cloneItem.style.webkitTransformStyle = "preserve-3d";
+				setTimeout(function(){
+					var newImg = new Image();
+					newImg.onload = function(){
+						img.src = this.src;
+					}
+					newImg.src = img.src.replace(/_[^\.]*\.jpg$/,"_310x310.jpg");
+					//img.style.webkitTransform = 'rotateY(180deg)';
+					newWrap.addEventListener("click",function(){
+						this.parentNode.removeChild(this);
+						item.style.opacity = 1;
+					},false);
+				},400);
+			},0);
+			
+			
+		},
+		/**
+		 * 
+		 */
+		_getStartPos:function(item){
+			var self = this,
+			scrollTop = self.scroll?self.scroll.y:document.documentElement.scrollTop,
+			outerWrapper = self.scroll?self.scroll.wrapper:document.body,
+			wrap = self.swipe.wrapper,
+			offsetTop,offsetLeft;
+			function getOffsetTop(obj,offset){
+				var parNode = obj.offsetParent;
+				offset = offset+obj.offsetTop;
+				console.log(offset);
+				if(parNode!=outerWrapper){
+					return getOffsetTop(parNode,offset);
+				}else{
+					return offset-Math.abs(scrollTop);
+				}
+			}
+			function getOffsetLeft(obj,offset){
+				var parNode = obj.offsetParent;
+				offset = obj.offsetLeft;
+				console.log(offset);
+				if(parNode!=wrap){
+					return getOffsetLeft(parNode,offset);
+				}else{
+					return offset+wrap;
+				}
+			}
+			offsetTop = getOffsetTop(wrap,0);
+			offsetLeft = item.offsetLeft+wrap.offsetLeft;
+			return {
+				top:offsetTop,
+				left:offsetLeft,
+				outerLeft:wrap.offsetLeft
+			};
+		},
+		/**
+		 * 
+		 */
+		_getEndPos:function(item){
+			var self = this,
+			offset = offset+item[propName],
+			wrap = item.offsetParent;
+			
+			
+		},
+
+		/**
+		 * 隐藏正在载入动画
+		 */
 		_hideLoading:function(obj){
 			if(obj.getElementsByTagName("canvas").length==0){
 				return;

@@ -20,9 +20,8 @@
 				<h1>cavasDraw</h1>
 			</header>
 			<div>
-				<form action="http://go.taobao.com/json/travel_note_upload_json.htm" enctype="multipart/form-data" method="post" target="a">
-					<input type="file" name="Filedata" id="test" />
-					<button>xxx</button>
+				<form action="upload.php" enctype="multipart/form-data" method="post" target="a">
+					<input type="file" name="myfile" id="test" filename="test.png" />
 				</form>
 				<iframe src="test.php" frameborder="0" id="a" name="a"></iframe>
 				<img src="pic01.jpg" alt="" />

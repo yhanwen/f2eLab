@@ -7,6 +7,7 @@ body{
 .header {
 	height:48px;
 	background:#333;
+	z-index: -1;
 }
 #wrapper{
 	position:absolute; z-index:1;
@@ -14,6 +15,17 @@ body{
 	width:100%;
 	background:#aaa;
 	overflow:auto;
+	
+}
+.popBigPicWrap {
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background:rgba(0,0,0,0.3);
+	-webkit-perspective:300;
+	z-index: 10000;
 }
 .scroll-area {
 	position:absolute; z-index:1;
@@ -23,7 +35,7 @@ body{
 	padding:0;
 }
 .scroll-area .switch-block {
-	background:#fff;
+	
 }
 /*switch page*/
 .onSwitch {
@@ -63,7 +75,6 @@ body{
 	-webkit-box-orient:vertical;
 	-webkit-box-pack:center;
 	-webkit-box-align:center;
-	overflow:hidden;
 }
 
 #swipeview-slider img {
@@ -109,7 +120,6 @@ body{
 	-webkit-transition-property:opacity;
 	-webkit-box-sizing:border-box;
 	opacity:1;
-	pointer-events:none;
 	width:260px;
 	height:340px;
 	overflow:hidden;
@@ -142,8 +152,9 @@ body{
 }
 #colview .col {
 	width:100%;
+	-webkit-perspective: 300;
 }
-#colview .swipeview-box {
+.swipeview-box {
 	display:block;
 	border:5px solid #eee;
 	-webkit-box-shadow:0 2px 6px #000;
@@ -152,16 +163,18 @@ body{
 	-webkit-transition-property:opacity;
 	-webkit-box-sizing:border-box;
 	opacity:1;
-	pointer-events:none;
+	
 	width:140px;
 	height:190px;
 	overflow:hidden;
 	text-align:center;
 	float:left;
-	margin:0 5px
-}
-#colview img {
+	margin:0 5px;
 	
+}
+.swipeview-box img {
+	min-width:100%;
+	min-height:100%;
 }
 #colview > div > .swipeview-loading {
 	/*background-image:-webkit-gradient(linear, 0 0, 0 100%, from(#444), to(#555)),

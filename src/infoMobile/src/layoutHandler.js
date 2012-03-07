@@ -44,7 +44,7 @@ function layoutHandler(){
 			var self = this;
 			var headerHeight = this.head.offsetHeight,
 			contentHeight = this.wrapper.offsetHeight+headerHeight;
-			this.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
+			//this.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
 			self.scroll.refresh();
 			if(document.body.scrollTop>0){
 				win.scrollTo(0,0);
