@@ -145,45 +145,89 @@
 				drawItem();
 			},60);
 		},
+
+        /**
+         * 隐藏正在载入动画
+         */
+        _hideLoading:function(obj){
+            if(obj.getElementsByTagName("canvas").length==0){
+                return;
+            }
+            var self = this,
+            canvas = obj.getElementsByTagName("canvas")[0];
+            canvas.style.opacity=0;
+            setTimeout(function(){
+                clearInterval(self.canvasInterval);
+                try{obj.removeChild(canvas);}catch(e){}
+            },1000)
+            
+        },
+        
+        
 		/**
 		 * 切换到大图
 		 */
 		_switchBig:function(item){
 			var self = this,
+			
+			
 			item = item,
+			cloneItem = item.cloneNode(true),
+			img = cloneItem.querySelector("img"),
+			
+			
 			docScroll = document.documentElement.scrollTop,
 			itemPos = self._getStartPos(item),
-			cloneItem = item.cloneNode(true),
+			
+			
+			//childs = item.parentNode.children,
+			outerWrapper = self.scroll?self.scroll.wrapper:document.body,
+			//为弹出图片添加一个遮罩层容器
 			newWrap = document.createElement("div"),
-			img = cloneItem.querySelector("img"),
-			childs = item.parentNode.children,
-			outerWrapper = self.scroll?self.scroll.wrapper:document.body;
-			//设置cloneitem的位置
-			newWrap.className = "popBigPicWrap"
+			//遮罩层容器类名
+			newWrapCls = "popBigPicWrap";
+			newWrap.className = newWrapCls;
+			
+			//设置浮出图片的初始位置和样式
 			cloneItem.style.position = "absolute";
+			
+			//由于border等影响，会有几像素的偏差，后期需要调整
 			cloneItem.style.top = itemPos["top"]+5+"px";
 			cloneItem.style.left = itemPos["left"]-5+"px";
+			
 			cloneItem.style.zIndex = "100";
+			cloneItem.style.webkitTransition = "all 0.6s ease-in-out";
+			
+			//隐藏原始图片
+			item.style.opacity = 0;
+			
 			outerWrapper.appendChild(newWrap);
 			newWrap.appendChild(cloneItem);
-			cloneItem.style.webkitTransition = "all 0.6s ease-in-out";
-			item.style.opacity = 0;
+			
+			//设置图片的最终状态，动画由transition完成
 			setTimeout(function(){
 				//img.style.webkitTransform="translate3d(0,0,0)";
+				
 				cloneItem.style.top = 3+"px";
 				cloneItem.style.left = itemPos["outerLeft"]+3+"px";
 				cloneItem.style.width = "280px";
 				cloneItem.style.height = "360px";
+				//旋转效果
 				//cloneItem.style.webkitTransform = 'rotateY(180deg) scaleX('+(280/cloneItem.clientWidth)+') scaleY('+(360/cloneItem.clientHeight)+')';
 				img.style.webkitTransformStyle = "preserve-3d"
 				cloneItem.style.webkitTransformStyle = "preserve-3d";
+				
+				//动画进行到一半时绑定事件并切换到大图
 				setTimeout(function(){
 					var newImg = new Image();
 					newImg.onload = function(){
 						img.src = this.src;
 					}
 					newImg.src = img.src.replace(/_[^\.]*\.jpg$/,"_310x310.jpg");
+					//做3d变换时将图片翻转
 					//img.style.webkitTransform = 'rotateY(180deg)';
+					
+					//绑定取消动作
 					newWrap.addEventListener("click",function(){
 						this.parentNode.removeChild(this);
 						item.style.opacity = 1;
@@ -194,10 +238,12 @@
 			
 		},
 		/**
-		 * 
+		 * 获取要放大的元素的初始位置（相对滚动容器）
 		 */
 		_getStartPos:function(item){
 			var self = this,
+			
+			//如果没有使用iscroll则取相对body的位置
 			scrollTop = self.scroll?self.scroll.y:document.documentElement.scrollTop,
 			outerWrapper = self.scroll?self.scroll.wrapper:document.body,
 			wrap = self.swipe.wrapper,
@@ -224,38 +270,12 @@
 			}
 			offsetTop = getOffsetTop(wrap,0);
 			offsetLeft = item.offsetLeft+wrap.offsetLeft;
+			//返回当前元素的top,left,和外部容器的left
 			return {
 				top:offsetTop,
 				left:offsetLeft,
 				outerLeft:wrap.offsetLeft
 			};
-		},
-		/**
-		 * 
-		 */
-		_getEndPos:function(item){
-			var self = this,
-			offset = offset+item[propName],
-			wrap = item.offsetParent;
-			
-			
-		},
-
-		/**
-		 * 隐藏正在载入动画
-		 */
-		_hideLoading:function(obj){
-			if(obj.getElementsByTagName("canvas").length==0){
-				return;
-			}
-			var self = this,
-			canvas = obj.getElementsByTagName("canvas")[0];
-			canvas.style.opacity=0;
-			setTimeout(function(){
-				clearInterval(self.canvasInterval);
-				try{obj.removeChild(canvas);}catch(e){}
-			},1000)
-			
 		}
 	}
 	
