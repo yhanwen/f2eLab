@@ -2,10 +2,12 @@
  * layoutHandler
  * 处理各种界面变化
  */
-function layoutHandler(){
+function layoutHandler(el){
 	this.scroll;
-	this.wrapper = DOM.get("#wrapper");
+	this.wrapper = typeof el == 'object' ? el : DOM.get(el);
 	this.head = DOM.get("header");
+	this.isAndroid = (/android/gi).test(navigator.appVersion);
+	this.isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
 }
 (function(){
 	var doc = document,
@@ -14,14 +16,16 @@ function layoutHandler(){
 		constructor:layoutHandler,
 		_init:function(){
 			var self = this;
-			self._hideHead();
-			self._buildIScroll();
-			window.addEventListener("scroll",function(){
-				self._resize();
-			},false);
-			window.addEventListener("resize",function(){
-				self._resize();
-			},false);
+			setTimeout(function(){
+				self._hideHead();
+				self._buildIScroll();
+				self.__windowEventHandler = function(){
+					self._resize();
+				}
+				window.addEventListener("scroll",self.__windowEventHandler,false);
+				window.addEventListener("resize",self.__windowEventHandler,false);
+			},200);
+			
 		},
 		_hideHead:function(){
 			var self = this;
@@ -33,58 +37,46 @@ function layoutHandler(){
 		},
 		_buildIScroll:function(){
 			var self = this;
-			self.scroll = new iScroll('wrapper', {
-				onScrollEnd:function(){
+			if(self.isIDevice){
+				self.scroll = new iScroll(self.wrapper, {
+					onScrollEnd:function(){
 			
-				}
-			});
+					}
+				});
+			}
 			self._resize();
 		},
 		_resize:function(){
 			var self = this;
-			var headerHeight = this.head.offsetHeight,
-			contentHeight = this.wrapper.offsetHeight+headerHeight;
-			//this.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
-			self.scroll.refresh();
-			if(document.body.scrollTop>0){
-				win.scrollTo(0,0);
+			if(self.scroll){
+				var headerHeight = this.head.offsetHeight,
+				contentHeight = this.wrapper.offsetHeight+headerHeight;
+				//this.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
+				self.scroll.refresh();
+				if(document.body.scrollTop>0){
+					win.scrollTo(0,0);
+				}
+			}else{
+				this.wrapper.style.cssText = 'position:relative; height:auto;top:0;';
+				this.wrapper.children[0].style.cssText = "position:relative;";
+				DOM.get("html").style.overflow = "auto";
 			}
 		},
-		switchPage:function(fromEl,toEl){
-			var self = this,
-			wrapper = DOM.get("div",self.scroll.wrapper);
-			wrapper.appendChild(toEl);
-			toEl.style.height = self.scroll.wrapper.offsetHeight+"px";
-			fromEl.style.height = self.scroll.wrapper.offsetHeight+"px";
-			DOM.addClass(toEl,"onSwitch");
-			DOM.addClass(toEl,"beforeShow");
-			DOM.addClass(fromEl,"onSwitch");
-			DOM.addClass(fromEl,"beforeHide");
+		/**
+		 * 销毁实例
+		 */
+		destroy:function(){
+			var self = this;
+			//移除窗口绑定的事件
+			if(self.__windowEventHandler){
+				window.removeEventListener("scroll",self.__windowEventHandler);
+				window.removeEventListener("resize",self.__windowEventHandler);
+			}
+			//移除iScroll组件
+			if(self.scroll){
+				self.scroll.destroy();
+			}
 			
-			setTimeout(function(){
-				DOM.addClass(toEl,"afterShow");
-				DOM.addClass(fromEl,"afterHide");
-			},10);
-			setTimeout(function(){
-				toEl.style.WebkitTransitionDuration = 0;
-				//DOM.removeClass(toEl,["onSwitch","beforeShow","afterShow"]);
-				wrapper.removeChild(fromEl);
-				//toEl.style.height="auto";
-				//toEl.setAttribute("style","");
-				setTimeout(function(){
-					var newEl = toEl.cloneNode(true);
-					DOM.removeClass(newEl,["onSwitch","beforeShow","afterShow"]);
-					newEl.setAttribute("style","");
-					wrapper.appendChild(newEl);
-					setTimeout(function(){
-						wrapper.removeChild(toEl);
-						self.scroll.refresh();
-					},100);
-					
-					
-				},10);
-				
-			},610);
 		}
 		
 	}

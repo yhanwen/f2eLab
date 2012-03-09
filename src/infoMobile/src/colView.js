@@ -85,7 +85,8 @@
 				var img = document.createElement("img"),
 				span = document.createElement("div");
 				span.className = "swipeview-box";
-				span.appendChild(img);
+				span.appendChild(img),
+				isShow = true;
 				
 				el = img;
 				el.style.webkitTransform="translate3d(0,0,0)";
@@ -99,9 +100,16 @@
 	
 				}
 				el.src = slides[i].img;
-				span.addEventListener("click",function(e){
-					e.preventDefault();
-					self._switchBig(this);
+				span.addEventListener("touchmove",function(e){
+					isShow = false;
+				},false);
+				span.addEventListener("touchend",function(e){
+					if(isShow){
+						e.preventDefault();
+						self._switchBig(this);
+					}else{
+						isShow = true;
+					}
 				},false);
 				return span;
 			}else {
@@ -175,8 +183,8 @@
 			cloneItem = item.cloneNode(true),
 			img = cloneItem.querySelector("img"),
 			
-			
-			docScroll = document.documentElement.scrollTop,
+			hasScroll = !!self.scroll,
+			docScroll = document.body.scrollTop,
 			itemPos = self._getStartPos(item),
 			
 			
@@ -187,16 +195,18 @@
 			//遮罩层容器类名
 			newWrapCls = "popBigPicWrap";
 			newWrap.className = newWrapCls;
-			
+			if(!hasScroll){
+				newWrap.style.top = docScroll+"px"
+			}
 			//设置浮出图片的初始位置和样式
 			cloneItem.style.position = "absolute";
 			
 			//由于border等影响，会有几像素的偏差，后期需要调整
-			cloneItem.style.top = itemPos["top"]+5+"px";
+			cloneItem.style.top = itemPos["top"]+5-docScroll+"px";
 			cloneItem.style.left = itemPos["left"]-5+"px";
 			
 			cloneItem.style.zIndex = "100";
-			cloneItem.style.webkitTransition = "all 0.6s ease-in-out";
+			cloneItem.style.webkitTransition = "all 0.3s ease-in-out";
 			
 			//隐藏原始图片
 			item.style.opacity = 0;
@@ -208,7 +218,7 @@
 			setTimeout(function(){
 				//img.style.webkitTransform="translate3d(0,0,0)";
 				
-				cloneItem.style.top = 3+"px";
+				cloneItem.style.top = (newWrap.clientHeight-360)/2+"px";
 				cloneItem.style.left = itemPos["outerLeft"]+3+"px";
 				cloneItem.style.width = "280px";
 				cloneItem.style.height = "360px";
@@ -228,11 +238,14 @@
 					//img.style.webkitTransform = 'rotateY(180deg)';
 					
 					//绑定取消动作
-					newWrap.addEventListener("click",function(){
+					newWrap.addEventListener("touchend",function(){
 						this.parentNode.removeChild(this);
 						item.style.opacity = 1;
 					},false);
-				},400);
+					newWrap.addEventListener("touchmove",function(e){
+						e.preventDefault();
+					},false);
+				},300);
 			},0);
 			
 			
@@ -276,6 +289,13 @@
 				left:offsetLeft,
 				outerLeft:wrap.offsetLeft
 			};
+		},
+		/**
+		 * 销毁实例
+		 */
+		destroy:function(){
+			var self = this;
+			self.swipe.destroy();
 		}
 	}
 	

@@ -127,6 +127,13 @@
 				
 			},1000)
 			
+		},
+		/**
+		 * Ïú»ÙÊµÀý
+		 */
+		destroy:function(){
+			var self = this;
+			self.swipe.destroy();
 		}
 	}
 	
