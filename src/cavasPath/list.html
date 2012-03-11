@@ -1,0 +1,412 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>HMTL5</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="format-detection" content="address=no;email=no" />
+	<link rel="apple-touch-icon-precomposed" href="//ssl.gstatic.com/m/images/mobile_emerald_sea_57x57.png">
+    <!-- html5reset and css3 -->
+    <link rel="stylesheet" href="http://a.tbcdn.cn/??p/global/1.0/global-min.css,app/dp/s/html5/css/common-min.css"/>
+	 <!-- todo: -->
+	 <link rel="stylesheet" href="css/main.css"/>
+	 <style type="text/css">
+	     html{
+	         width:100%;
+	         height:100%;
+	     }
+	     body{
+	         width:100%;
+	         height:100%;
+	     }
+	 </style>
+</head>
+<body>
+    <canvas id="J_canvas" style="position: absolute; top:0px; left:0px;"></canvas>
+    <script type="text/javascript">
+        Number.prototype.sqr = function(){
+            return this*this;
+        }
+        var doc = document, Get = document.querySelector;
+        var canvas = doc.getElementById("J_canvas"),
+        ctx = canvas.getContext("2d"),
+        hasTouch =  'ontouchstart' in window,
+        canvasWidth = canvas.width = doc.body.clientWidth,
+        canvasHeight = canvas.height = doc.body.clientHeight,
+        // Events
+        RESIZE_EV = 'onorientationchange' in window ? 'orientationchange' : 'resize',
+        START_EV = hasTouch ? 'touchstart' : 'mousedown',
+        MOVE_EV = hasTouch ? 'touchmove' : 'mousemove',
+        END_EV = hasTouch ? 'touchend' : 'mouseup',
+        CANCEL_EV = hasTouch ? 'touchcancel' : 'mouseup',
+        //横边的控制点
+        startp1 = {x:0,y:canvasHeight},
+        endp1 = {x:0,y:0},
+        vetexp1 = {x:0,y:0},
+        cp1 = {x:0,y:canvasHeight},
+        //竖边的控制点
+        startp2 = {x:canvasWidth,y:1},
+        endp2 = {x:0,y:0},
+        vetexp2 = {x:0,y:0},
+        cp2 = {x:canvasWidth,y:0},
+        //右下角
+        crb = {x:canvasWidth,y:canvasHeight},
+        clb = {x:0,y:canvasHeight},
+        crt = {x:canvasWidth,y:0},
+        clt = {x:0,y:0},
+        //触点
+        mP = {x:0,y:0},
+        //阴影大小
+        shadowWidth = 0,
+        //当前页
+        curPageColor = "#900",
+        //开始点
+        startX,startY,
+        //是否开始渲染
+        startDraw = false,
+        //动画计时
+        interval,
+        //页面数据
+        pageData;
+        
+        ctx.moveTo = function(point){
+            return this.constructor.prototype.moveTo.call(this,point.x,point.y);
+        }
+        ctx.lineTo = function(point){
+            return this.constructor.prototype.lineTo.call(this,point.x,point.y);
+        }
+        ctx.quadraticCurveTo = function(cp,endp){
+            return this.constructor.prototype.quadraticCurveTo.call(this,cp.x,cp.y,endp.x,endp.y);
+        }
+        
+        
+        
+        //计算各种点的位置
+        function getCps(flag){
+       
+            var ofx = crb.x-mP.x,
+            ofy = crb.y-mP.y,
+            dis = Math.sqrt(ofx.sqr()+ofy.sqr()),
+            offsetx = offsety = crb.x*0.08,
+            posX = crb.x - dis.sqr()/(2*ofx);
+            //修正点
+            
+            if(posX>0||flag){
+                startDraw=true;
+                cp1.x =crb.x - dis.sqr()/(2*ofx);
+                cp2.y = crb.y - dis.sqr()/(2*ofy);
+                //计算开始点
+                if(Math.min(cp1.x,(crb.x-cp1.x))<offsetx){
+                   offsetx = Math.min(cp1.x,(crb.x-cp1.x));
+                }
+
+                if(offsety>=(crb.y-cp2.y)){
+                    offsety = crb.y-cp2.y;
+                }
+                startp1.x = cp1.x - offsetx;
+                startp2.y = cp2.y - offsety;
+                //计算结束点
+                var scale1 = (offsetx/(crb.x-cp1.x)),
+                scale2 = (offsety/(crb.y-cp2.y));
+                endp1 = {
+                    x:cp1.x+(mP.x-cp1.x)*scale1,
+                    y:crb.y - (crb.y-mP.y)*scale1
+                }
+                endp2 = {
+                    x:crb.x-(crb.x-mP.x)*scale2,
+                    y:cp2.y+(mP.y-cp2.y)*scale2
+                }
+                //计算贝塞尔曲线顶点
+                var midp1 = {
+                    x:startp1.x+(endp1.x-startp1.x)/2,
+                    y:crb.y-(crb.y-endp1.y)/2
+                },
+                midp2 = {
+                    x:crb.x-(crb.x-endp2.x)/2,
+                    y:startp2.y+(endp2.y-startp2.y)/2
+                };
+                vetexp1 = {
+                    x:midp1.x+(cp1.x-midp1.x)/2,
+                    y:crb.y-(crb.y-midp1.y)/2
+                };
+                vetexp2 = {
+                    x:crb.x-(crb.x-midp2.x)/2,
+                    y:midp2.y+(cp2.y-midp2.y)/2
+                };
+                //计算阴影宽度
+                var basic = Math.max(canvasWidth,canvasHeight)/10;
+                shadowWidth = Math.max((crb.x-mP.x)*basic/crb.x,(crb.y-mP.y)*basic/crb.y);
+            }else{
+                startDraw = false;
+            }  
+        }
+        //绘制完整页面
+        function drawTopPage(){
+            var img = new Image();
+            img.onload = function(){
+              ctx.save();
+              ctx.clearRect(0,0,canvasWidth,canvasWidth);
+             ctx.transform(-1,0,0,-1,canvasWidth,canvasHeight);
+              
+              
+              ctx.drawImage(img,0,0,canvasWidth,canvasHeight);
+              pageData = img;
+              ctx.restore();
+            }
+            img.src = "http://pic1.ajkimg.com/display/anjuke/8622694daaade7684c8ca7ee707049d4_741894/320x240.jpg";
+
+            
+        }
+        function drawFrontPage(){
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(clt);
+            ctx.lineTo(clb);
+            ctx.lineTo(startp1);
+            ctx.quadraticCurveTo(cp1,endp1);
+            ctx.lineTo(mP);
+            ctx.lineTo(endp2);
+            ctx.quadraticCurveTo(cp2,startp2);
+            ctx.lineTo(crt);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(pageData,0,0,canvasWidth,canvasHeight);
+            //画出
+            ctx.restore();
+        }
+        function drawBackPage(){
+            ctx.save();
+            //获取右下角区域
+            ctx.beginPath();
+            ctx.moveTo(crb);
+            ctx.lineTo(clb);
+            ctx.lineTo(startp1);
+            ctx.quadraticCurveTo(cp1,endp1);
+            ctx.lineTo(mP);
+            ctx.lineTo(endp2);
+            ctx.quadraticCurveTo(cp2,startp2);
+            ctx.lineTo(crb);
+            ctx.closePath();
+            ctx.clip();
+            //获取翻起区
+            ctx.beginPath();
+            ctx.moveTo(mP);
+            ctx.lineTo(vetexp1);
+            ctx.lineTo(vetexp2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.fillStyle = "#CCC";
+            ctx.fill();
+            ctx.globalAlpha = 0.5;
+            //确定原点
+            ctx.translate(mP.x,mP.y);
+            ctx.transform(-1,0,0,-1,canvasWidth,canvasHeight);
+            ctx.drawImage(pageData,0,0,canvasWidth,canvasHeight);
+            ctx.restore();
+        }
+        function drawNextPage(){
+            ctx.save();
+            //获取右下角区域
+            ctx.beginPath();
+            ctx.moveTo(crb);
+            ctx.lineTo(clb);
+            ctx.lineTo(startp1);
+            ctx.quadraticCurveTo(cp1,endp1);
+            ctx.lineTo(mP);
+            ctx.lineTo(endp2);
+            ctx.quadraticCurveTo(cp2,startp2);
+            ctx.lineTo(crb);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(pageData,0,0,canvasWidth,canvasHeight);
+            ctx.restore();
+        }
+        //绘制巻起页在本页的阴影
+        function drawShadow(){
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(clt);
+            ctx.lineTo(clb);
+            ctx.lineTo(startp1);
+            ctx.quadraticCurveTo(cp1,endp1);
+            ctx.lineTo(mP);
+            ctx.lineTo(endp2);
+            ctx.quadraticCurveTo(cp2,startp2);
+            ctx.lineTo(crt);
+            ctx.closePath();
+            ctx.clip();
+            //要放阴影的区
+            ctx.beginPath();
+            ctx.moveTo(mP);
+            ctx.lineTo(cp1);
+            ctx.lineTo(cp2);
+            ctx.closePath();
+            ctx.shadowBlur = shadowWidth;
+            ctx.shadowColor = "rgba(0,0,0,0.6)";
+            ctx.fillStyle = "#ccc";
+            ctx.fill();
+            //画出
+            ctx.restore();
+        }
+        //绘制卷起页背面的阴影
+        function drawBackShadow(){
+            ctx.save();
+            //获取右下角区域
+            ctx.beginPath();
+            ctx.moveTo(crb);
+            ctx.lineTo(clb);
+            ctx.lineTo(startp1);
+            ctx.quadraticCurveTo(cp1,endp1);
+            ctx.lineTo(mP);
+            ctx.lineTo(endp2);
+            ctx.quadraticCurveTo(cp2,startp2);
+            ctx.lineTo(crb);
+            ctx.closePath();
+            ctx.clip();
+            //获取翻起区
+            ctx.beginPath();
+            ctx.moveTo(mP);
+            ctx.lineTo(vetexp1);
+            ctx.lineTo(vetexp2);
+            ctx.closePath();
+            ctx.clip();
+            //绘制要画阴影的路径
+            ctx.beginPath();
+            ctx.moveTo(vetexp1);
+            ctx.lineTo(vetexp2);
+            ctx.lineTo(crb);
+            ctx.closePath();
+            ctx.shadowBlur = shadowWidth*2;
+            ctx.shadowColor = "rgba(0,0,0,0.8)";
+            ctx.fillStyle = "#ccc";
+            ctx.fill();
+            ctx.restore();
+        }
+        //绘制卷起页在下一页的阴影
+        function drawNextShadow(){
+            ctx.save();
+            //获取右下角区域
+            ctx.beginPath();
+            ctx.moveTo(startp1);
+            ctx.lineTo(startp2);
+            ctx.lineTo(crb);
+            ctx.closePath();
+            ctx.clip();
+            //绘制要画阴影的区域
+            ctx.beginPath();
+            ctx.moveTo(startp1);
+            ctx.lineTo(startp2);
+            ctx.lineTo(clt);
+            ctx.closePath();
+            ctx.shadowBlur = shadowWidth*2;
+            ctx.shadowColor = "rgba(0,0,0,1)";
+            ctx.fillStyle = "#ccc";
+            ctx.fill();
+            ctx.restore();
+        }
+        function drawPage(){
+
+                ctx.clearRect(0,0,canvasWidth,canvasWidth);
+                drawNextPage();
+                drawNextShadow();
+                drawFrontPage();
+                drawBackPage();
+                drawShadow();
+                drawBackShadow();
+            
+        }
+        //scrollTopNext
+        function scrollToNext(){
+            var startX = mP.x,
+            startY = mP.y,
+            endX = -canvasWidth,
+            endY = canvasHeight,
+            step = 100,
+            scale = (endY-startY)/(startX-endX);
+            clearInterval(interval);
+            interval = setInterval(function(){
+                if(mP.x<=endX&&mP.y>=endY){
+                    mP.x = endX;
+                    mP.y = endY;
+                    getCps();
+                    drawPage();
+                    clearInterval(interval);
+                    startDraw = false;
+                    drawTopPage();
+                }else{
+                    mP.x = mP.x-step;
+                    mP.y = mP.y+step*scale;
+                    getCps();
+                    drawPage();
+                    startDraw = false;
+                }
+            },20);
+        }
+        function scrollToPrev(){
+            var startX = mP.x,
+            startY = mP.y,
+            endX = canvasWidth,
+            endY = canvasHeight,
+            step = 20,
+            scale = (endY-startY)/(endX-startX);
+            clearInterval(interval);
+            interval = setInterval(function(){
+                if(mP.x>=endX&&mP.y>=endY){
+                    mP.x = endX;
+                    mP.y = endY;
+                    getCps();
+                    drawPage();
+                    clearInterval(interval);
+                    startDraw = false;
+                    drawTopPage();
+                }else{
+                    mP.x = mP.x+step;
+                    mP.y = mP.y+step*scale;
+                    getCps();
+                    drawPage();
+                    startDraw = false;
+                }
+            },20);
+        }
+       // var content = "恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式恢复。一旦被调用，将会恢复到上一次保存的样式";
+        drawTopPage();
+        canvas.addEventListener(START_EV,function(e){
+            var point = hasTouch ? e.touches[0] : e;
+            startDraw = true;
+            mP = {x:point.pageX,y:point.pageY};
+            startX = mP.x;
+            startY = mP.y;
+            getCps();
+            if(startDraw){
+                drawPage();
+                
+            }
+        });
+        canvas.addEventListener(MOVE_EV,function(e){
+            var point = hasTouch ? e.touches[0] : e;
+            e.preventDefault();
+            if(startDraw){
+                getCps();
+                
+                mP = {x:point.pageX,y:point.pageY};
+                drawPage();
+            }
+        });
+        canvas.addEventListener(END_EV,function(e){
+             startDraw = false;
+             if(Math.abs(mP.x-startX)>20){
+                 if(mP.x>startX){
+                     scrollToPrev();
+                 }else
+                    scrollToNext();
+             }else{
+                 scrollToPrev();
+             }
+        });
+        
+    </script>
+</body>
+</html>
