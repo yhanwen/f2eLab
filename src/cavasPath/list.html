@@ -34,8 +34,8 @@
         var canvas = doc.getElementById("J_canvas"),
         ctx = canvas.getContext("2d"),
         hasTouch =  'ontouchstart' in window,
-        canvasWidth = canvas.width = doc.body.clientWidth,
-        canvasHeight = canvas.height = doc.body.clientHeight,
+        canvasWidth = canvas.width = doc.body.clientWidth>400?400:doc.body.clientWidth,
+        canvasHeight = canvas.height = doc.body.clientHeight>500?500:doc.body.clientHeight,
         // Events
         RESIZE_EV = 'onorientationchange' in window ? 'orientationchange' : 'resize',
         START_EV = hasTouch ? 'touchstart' : 'mousedown',
@@ -59,6 +59,11 @@
         clt = {x:0,y:0},
         //触点
         mP = {x:0,y:0},
+        //旋转角度
+        angle,
+        
+        //缩放系数
+        scaleMass,
         //阴影大小
         shadowWidth = 0,
         //当前页
@@ -70,8 +75,10 @@
         //动画计时
         interval,
         //页面数据
-        pageData;
+        pageData,
+        nextPageData;
         
+        //重新定义画线方法
         ctx.moveTo = function(point){
             return this.constructor.prototype.moveTo.call(this,point.x,point.y);
         }
@@ -139,9 +146,22 @@
                 //计算阴影宽度
                 var basic = Math.max(canvasWidth,canvasHeight)/10;
                 shadowWidth = Math.max((crb.x-mP.x)*basic/crb.x,(crb.y-mP.y)*basic/crb.y);
+                scaleMass = {
+                	x:(crb.x-mP.x)/crb.x,
+                	y:(crb.y-mP.y)/crb.y
+                }
+                //计算角度
+                angle = Math.atan((crb.x-cp1.x)/(crb.y-cp2.y));
             }else{
                 startDraw = false;
             }  
+        }
+        //处理数据
+        function changeData(){
+        	var temp;
+        	temp = pageData;
+        	pageData = nextPageData;
+        	nextPageData = temp;
         }
         //绘制完整页面
         function drawTopPage(){
@@ -149,16 +169,22 @@
             img.onload = function(){
               ctx.save();
               ctx.clearRect(0,0,canvasWidth,canvasWidth);
-             ctx.transform(-1,0,0,-1,canvasWidth,canvasHeight);
-              
-              
               ctx.drawImage(img,0,0,canvasWidth,canvasHeight);
               pageData = img;
               ctx.restore();
             }
             img.src = "http://pic1.ajkimg.com/display/anjuke/8622694daaade7684c8ca7ee707049d4_741894/320x240.jpg";
-
-            
+            var img1 = new Image();
+            img1.onload = function(){
+              nextPageData = img1;
+            }
+            img1.src = "http://img03.taobaocdn.com/tps/i3/T1KP9VXnVpXXXXXXXX-270-390.jpg";
+        }
+        function drawNewPage(){
+        	ctx.save();
+              ctx.clearRect(0,0,canvasWidth,canvasWidth);
+              ctx.drawImage(pageData,0,0,canvasWidth,canvasHeight);
+              ctx.restore();
         }
         function drawFrontPage(){
             ctx.save();
@@ -198,13 +224,17 @@
             ctx.lineTo(vetexp2);
             ctx.closePath();
             ctx.clip();
-            ctx.fillStyle = "#CCC";
+            ctx.fillStyle = "#999";
             ctx.fill();
             ctx.globalAlpha = 0.5;
             //确定原点
-            ctx.translate(mP.x,mP.y);
-            ctx.transform(-1,0,0,-1,canvasWidth,canvasHeight);
+            //ctx.translate(mP.x,mP.y);
+            ctx.translate(mP.x-15*Math.cos(angle),mP.y-15*Math.sin(angle));
+	        ctx.rotate(-(Math.PI/4-angle)*2);
+	        ctx.transform(0,-1,-1,0,canvasHeight*1,canvasWidth*1);
+            //console.log(Math.PI/2 - angle);
             ctx.drawImage(pageData,0,0,canvasWidth,canvasHeight);
+            ctx.stroke();
             ctx.restore();
         }
         function drawNextPage(){
@@ -221,7 +251,7 @@
             ctx.lineTo(crb);
             ctx.closePath();
             ctx.clip();
-            ctx.drawImage(pageData,0,0,canvasWidth,canvasHeight);
+            ctx.drawImage(nextPageData,0,0,canvasWidth,canvasHeight);
             ctx.restore();
         }
         //绘制巻起页在本页的阴影
@@ -280,9 +310,9 @@
             ctx.lineTo(crb);
             ctx.closePath();
             ctx.shadowBlur = shadowWidth*2;
-            ctx.shadowColor = "rgba(0,0,0,0.8)";
+            ctx.shadowColor = "rgba(0,0,0,1)";
             ctx.fillStyle = "#ccc";
-            ctx.fill();
+            ctx.fill();ctx.fill();
             ctx.restore();
         }
         //绘制卷起页在下一页的阴影
@@ -327,6 +357,7 @@
             step = 100,
             scale = (endY-startY)/(startX-endX);
             clearInterval(interval);
+            
             interval = setInterval(function(){
                 if(mP.x<=endX&&mP.y>=endY){
                     mP.x = endX;
@@ -335,7 +366,8 @@
                     drawPage();
                     clearInterval(interval);
                     startDraw = false;
-                    drawTopPage();
+                    changeData();
+                    drawNewPage();
                 }else{
                     mP.x = mP.x-step;
                     mP.y = mP.y+step*scale;
@@ -361,7 +393,7 @@
                     drawPage();
                     clearInterval(interval);
                     startDraw = false;
-                    drawTopPage();
+                    drawNewPage();
                 }else{
                     mP.x = mP.x+step;
                     mP.y = mP.y+step*scale;
@@ -401,6 +433,7 @@
                  if(mP.x>startX){
                      scrollToPrev();
                  }else
+                 	
                     scrollToNext();
              }else{
                  scrollToPrev();
