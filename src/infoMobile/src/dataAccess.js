@@ -4,14 +4,12 @@ dataAccess = {
 	        head = doc.head || doc.getElementsByTagName("head")[0],
 	        node = doc.createElement('script');
 	    node.type = "text/javascript";
-		View.showLoading();
 	    node.src = url;
 	    node.async = true;
 	    if (charset) {
 	        node.charset = charset;
 	    }
 	    node.addEventListener("load",function(){
-	    	View.hideLoading();
 	    	fn&&fn();
 	    });
 	    head.insertBefore(node, head.firstChild);

@@ -33,11 +33,37 @@ View = (function(){
 		 * 创建页面框架
 		 */
 		buildNewPage:function(fn){
-			var page = doc.createElement("div");
+			var page = doc.createElement("div"),
+            oldPage = _wrapper.querySelector(".switch-block");
 			page.className = "switch-block";
-			// _wrapper.appendChild(page);
-			// fn&&fn();
+			
+            page.style.cssText = "position:absolute; top:0; left:0; width:100%;";
+            page.style.zIndex=-1;
+            page.style.opacity = 0;
+            page.style.webkitTransition = "all 1s";
+            
+            !loadingCanvas&&this.showLoading();
 			return page;
+		},
+		/**
+		 * 显示新页面
+		 */
+		showNewPage:function(page){
+		    var self = this,
+		    oldPage;
+		    page.addEventListener("webkitTransitionEnd",function(){
+		       oldPage = _wrapper.querySelectorAll(".switch-block");
+               if(oldPage[1])_wrapper.removeChild(oldPage[0]);
+               page.style.position = "relative";
+               self.hideLoading();
+            },false);
+		    setTimeout(function(){
+		        page.style.zIndex=100;
+                page.style.opacity = 1;
+		    },0)
+		    
+		    
+		    
 		},
 		/**
 		 * 渲染标签列表页(首页)
@@ -46,11 +72,13 @@ View = (function(){
 			var self = this,
 			page = self.buildNewPage();
 			if(!data.list.length)return;
+			
 			_wrapper.appendChild(page);
 			setTimeout(function(){
 				for(i in data.list){
 					self._renderScrollList(data.list[i],page);
 				}
+				self.showNewPage(page);
 			},0);
 			
 			
@@ -124,12 +152,14 @@ View = (function(){
 		 * 隐藏载入中动画
 		 */
 		hideLoading:function(fn){
-			loadingCanvas.style.opacity = 0;
-			loadingCanvas.addEventListener("webkitTransitionEnd",function(){
-				loadingCanvas.parentNode.removeChild(loadingCanvas);
-				loadingCanvas = null;
-				fn&&fn();
-			});
+		    if(loadingCanvas){
+    			loadingCanvas.style.opacity = 0;
+    			loadingCanvas.addEventListener("webkitTransitionEnd",function(){
+    				loadingCanvas.parentNode.removeChild(loadingCanvas);
+    				loadingCanvas = null;
+    				fn&&fn();
+    			});
+			}
 		}
 	}
 })();
