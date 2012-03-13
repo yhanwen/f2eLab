@@ -1,0 +1,87 @@
+.scroll-list h3 {
+	border-top: solid 1px #140e0e;
+	padding-left: 10px;
+	background-image: -webkit-gradient(linear,0% 0%, 0% 100%, from(#292929), to(#1A1A1A));
+	height: 22px;
+	line-height: 22px;
+	-webkit-text-shadow: 0 0 2px #000;
+	color: #fff;
+}
+.swipeview-slider > div {
+	position: relative;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-box-pack: center;
+	-webkit-box-align: center;
+}
+.swipeview-slider img {
+	min-height: 100%;
+	min-width: 100%;
+	display: block;
+}
+.swipeview-slider span {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	padding: 20px 0;
+	display: block;
+	background: rgba(0,0,0,0.75);
+	font-size: 20px;
+	text-align: center;
+	text-shadow: 0 1px 0 #000;
+	border-top: 1px solid rgba(255,255,255,0.2);
+	-webkit-border-top-left-radius: 10px;
+	-webkit-border-top-right-radius: 10px;
+	-webkit-transition-duration: .3s;
+	-webkit-transition-property: -webkit-transform;
+	-webkit-transform: translate3d(0,100%,0);
+}
+.swipeview-slider .swipeview-active span {
+	-webkit-transform: translate3d(0,0,0);
+}
+.list-view {
+	border-top: solid 1px #140e0e;
+	background:#333;
+}
+.carousel-block {
+	height: 200px;
+	margin: 0 auto;
+	width: 300px;
+	overflow: visible !important;
+}
+.carousel-block .col {
+	width: 100%;
+	-webkit-perspective: 300;
+}
+.swipeview-box {
+	display: block;
+	border: 5px solid #eee;
+	-webkit-box-shadow: 0 2px 6px #000;
+	-webkit-border-radius: 2px;
+	-webkit-transition-duration: .4s;
+	-webkit-transition-property: opacity;
+	-webkit-box-sizing: border-box;
+	opacity: 1;
+	width: 140px;
+	height: 190px;
+	overflow: hidden;
+	text-align: center;
+	float: left;
+	margin: 0 5px;
+}
+.swipeview-box img {
+	min-width: 100%;
+	min-height: 100%;
+}
+.carousel-block > div > .swipeview-loading .swipeview-box, .swipeview-slider img.loading {
+	-webkit-transition-duration: 0s;
+}
+.carousel-block > div > .swipeview-loading .swipeview-box img {
+	-webkit-transition-duration: 0s;
+	opacity: 0;
+}
+.carousel-block > div > .swipeview-loading span {
+	-webkit-transition-duration: 0;
+	-webkit-transform: translate3d(0,100%,0);
+}

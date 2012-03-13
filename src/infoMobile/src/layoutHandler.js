@@ -24,7 +24,7 @@ function layoutHandler(el){
 				}
 				window.addEventListener("scroll",self.__windowEventHandler,false);
 				window.addEventListener("resize",self.__windowEventHandler,false);
-			},200);
+			},0);
 			
 		},
 		_hideHead:function(){
@@ -62,6 +62,7 @@ function layoutHandler(el){
 				DOM.get("html").style.overflow = "auto";
 			}
 		},
+
 		/**
 		 * Ïú»ÙÊµÀý
 		 */

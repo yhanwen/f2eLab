@@ -4,11 +4,12 @@
 (function(){
 	colView = function(config){
 		this.picData = config.data;
-		this.wrapperId = config.id;
+		this.wrapperEl = config.el;
 		this.step = config.step||2;
 		this.swipe = null;
 		this._buildSwipe();
 		this.scroll = config.scroll;
+		this.scroll&&this.scroll.refresh();
 	}
 	colView.prototype={
 		constructor:colView,
@@ -21,7 +22,7 @@
 			page, 
 			slides = self.picData;
 			if (this.picData.length) {
-				var gallery = self.swipe = new SwipeView(this.wrapperId, {
+				var gallery = self.swipe = new SwipeView(this.wrapperEl, {
 					numberOfPages: len,
 					loop:false
 				});
@@ -99,7 +100,7 @@
 					//that.style.cssText = "-webkit-transform:translate3d("+((viewWidth-that.clientWidth)/2)+"px,"+((viewHeight-that.clientHeight)/2)+"px,0)";
 	
 				}
-				el.src = slides[i].img;
+				el.src = slides[i].img+"_120x120.jpg";
 				span.addEventListener("touchmove",function(e){
 					isShow = false;
 				},false);
