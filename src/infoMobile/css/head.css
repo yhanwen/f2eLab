@@ -20,7 +20,7 @@
 	width:128px;
 	height:24px;
 	border:solid 1px #aa2525;
-	-webkit-border-radius:3px;
+	-webkit-border-radius:5px;
 	overflow:hidden;
 	position:absolute;
 	top:11px;
@@ -35,15 +35,16 @@
 	text-align:center;
 	line-height:22px;
 	color:#fff;
+	-webkit-transition:background 1s;
 	background-image: -webkit-gradient(linear,0% 0%, 0% 100%, from(#FF4949), to(#E63A3A), color-stop(0.5,#FF4949),color-stop(0.5,#E63A3A))
 }
 .head-nav a:first-of-type{
 	border-right:0;
-	-webkit-border-radius:2px 0 0 2px;
+	-webkit-border-radius:4px 0 0 4px;
 }
 .head-nav a:last-of-type{
 	border-left:0;
-	-webkit-border-radius:0 2px 2px 0;
+	-webkit-border-radius:0 4px 4px 0;
 }
 .head-nav a:hover{
 	text-decoration:none;

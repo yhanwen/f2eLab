@@ -4,7 +4,7 @@
 (function(){
 	galleryView = function(config){
 		this.picData = config.data;
-		this.wrapperId = config.id;
+		this.wrap = config.wrap;
 		this.swipe = null;
 		this._buildSwipe();
 	}
@@ -15,8 +15,9 @@
 			page, 
 			slides = self.picData;
 			if (this.picData.length) {
-				var gallery = self.swipe = new SwipeView(this.wrapperId, {
-					numberOfPages: this.picData.length
+				var gallery = self.swipe = new SwipeView(this.wrap, {
+					numberOfPages: this.picData.length,
+					loop:false
 				});
 				for (i=0; i<3; i++) {
 					page = i==0 ? slides.length-1 : i-1;
@@ -31,15 +32,15 @@
 					for (i=0; i<3; i++) {
 						upcoming = gallery.masterPages[i].dataset.upcomingPageIndex;
 						if (upcoming != gallery.masterPages[i].dataset.pageIndex) {
-							el = gallery.masterPages[i].querySelector('img');
-							
-							self._buildItem(upcoming,el);
+							el = gallery.masterPages[i].querySelector('swipeview-box');
+							el.parentNode.removeChild(el);
+							el = self._buildItem(upcoming);
+							gallery.masterPages[i].appendChild(el);
 						}
 					}
 				});
 				
 				gallery.onMoveOut(function () {
-					gallery.
 					gallery.masterPages[gallery.currentMasterPage].className = 
 					gallery.masterPages[gallery.currentMasterPage].className.replace(/(^|\s)swipeview-active(\s|$)/, '');
 				});
@@ -52,33 +53,37 @@
 				});
 			}
 		},
-		_buildItem:function(i,img){
+		_buildItem:function(i){
 			var el,page,
 			self = this,
-			slides = self.picData;
-			if(!img){
-				var img = document.createElement("img"),
-				span = document.createElement("div");
-				span.className = "swipeview-box";
-				span.appendChild(img);
-			}else{
-				var span = img.parentNode;
-			}
+			slides = self.picData,
+			loadHandler;
+			
+			var img = document.createElement("img"),
+			span = document.createElement("div");
+			span.className = "swipeview-box";
+			span.appendChild(img);
 			el = img;
-			el.style.webkitTransform="translate3d(0,0,0)";
+			
+			
 			//el.style.webkitTransition = "all 0s";
 			self._showLoading(span);
-			
-			el.onload = function () { 
-				that = this;
-				//el.style.webkitTransition = "all 1s";
+			el.src="";
+			el.style.opacity = 0;
+			loadHandler = function (e) { 
+				var that = e.currentTarget;
+				//that.style.cssText = "-webkit-transform:translate3d("+((viewWidth-that.clientWidth)/2)+"px,"+((viewHeight-that.clientHeight)/2)+"px,0)";
 				setTimeout(function(){
+					
 					self._hideLoading(span);
-					var viewWidth = span.clientWidth,viewHeight = span.clientHeight;
-					that.style.cssText = "-webkit-transform:translate3d("+((viewWidth-that.clientWidth)/2)+"px,"+((viewHeight-that.clientHeight)/2)+"px,0)";
+					that.style.cssText = "position:absolute;top:50%; left:50%; margin:-"+(that.clientHeight/2)+"px -"+(that.clientWidth/2)+"px auto;"
+					that.style.opacity = 1;
 				},0);
-			}
+					
+			};
+			el.onload = loadHandler;
 			el.src = slides[i].img;
+
 			return span;
 		},
 		_showLoading:function(obj){
@@ -107,10 +112,6 @@
 				ctx.restore();
 			}
 			drawItem();
-			self.canvasInterval = setInterval(function(){
-				tag.width = tag.width;
-				drawItem();
-			},60);
 		},
 		_hideLoading:function(obj){
 			var self = this,

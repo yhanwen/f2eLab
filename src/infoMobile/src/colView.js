@@ -9,7 +9,7 @@
 		this.swipe = null;
 		this._buildSwipe();
 		this.scroll = config.scroll;
-		this.scroll&&this.scroll.refresh();
+		
 	}
 	colView.prototype={
 		constructor:colView,
@@ -91,23 +91,33 @@
 				
 				el = img;
 				el.style.webkitTransform="translate3d(0,0,0)";
-				self._showLoading(par);
+				self._showLoading(span);
 				el.src="";
 				el.onload = function () { 
-					that = this;
-					self._hideLoading(par);
-					var viewWidth = span.clientWidth,viewHeight = span.clientHeight;
-					//that.style.cssText = "-webkit-transform:translate3d("+((viewWidth-that.clientWidth)/2)+"px,"+((viewHeight-that.clientHeight)/2)+"px,0)";
+					self._hideLoading(span);
+		
+				}
+				el.onerror = function () { 
+					self._hideLoading(span);
 	
 				}
-				el.src = slides[i].img+"_120x120.jpg";
+				el.src = slides[i].img+"_160x160.jpg";
+				
 				span.addEventListener("touchmove",function(e){
 					isShow = false;
 				},false);
 				span.addEventListener("touchend",function(e){
 					if(isShow){
 						e.preventDefault();
-						self._switchBig(this);
+						self._switchBig(this,slides[i]);
+					}else{
+						isShow = true;
+					}
+				},false);
+				span.addEventListener("click",function(e){
+					if(isShow){
+						e.preventDefault();
+						self._switchBig(this,slides[i]);
 					}else{
 						isShow = true;
 					}
@@ -134,7 +144,7 @@
 			tag.width = 30;
 			tag.height = 30;
 			obj.style.position="relative";
-			tag.style.cssText = "position:absolute; top:50%; left:50%; margin:-15px 0 0 -15px; -webkit-transition:all 1s";
+			tag.style.cssText = "position:absolute; top:50%; left:50%; margin:-15px 0 0 -15px; -webkit-transition:all 0.5s; background:rgba(0,0,0,0.7); -webkit-border-radius:5px;";
 			function drawItem(){
 				ctx.save();
 				ctx.translate(tag.width/2,tag.height/2);
@@ -142,7 +152,7 @@
 				count++;
 				for(i=0; i<edges; i++){
 					var color = (i)/edges;
-					ctx.fillStyle = "rgba(0,0,0,"+color+")";
+					ctx.fillStyle = "rgba(255,255,255,"+color+")";
 					ctx.rotate(Math.PI/(edges/2));
 					ctx.fillRect(-1,-10,2,5);
 				} 
@@ -150,8 +160,8 @@
 			}
 			drawItem();
 			self.canvasInterval = setInterval(function(){
-				tag.width = tag.width;
-				drawItem();
+				//tag.width = tag.width;
+				//drawItem();
 			},60);
 		},
 
@@ -176,7 +186,7 @@
 		/**
 		 * 切换到大图
 		 */
-		_switchBig:function(item){
+		_switchBig:function(item,data){
 			var self = this,
 			
 			
@@ -195,6 +205,9 @@
 			newWrap = document.createElement("div"),
 			//遮罩层容器类名
 			newWrapCls = "popBigPicWrap";
+			if(document.querySelector("."+newWrapCls)){
+				return;
+			}
 			newWrap.className = newWrapCls;
 			if(!hasScroll){
 				newWrap.style.top = docScroll+"px"
@@ -219,18 +232,20 @@
 			setTimeout(function(){
 				//img.style.webkitTransform="translate3d(0,0,0)";
 				
-				cloneItem.style.top = (newWrap.clientHeight-360)/2+"px";
+				cloneItem.style.top = (newWrap.clientHeight-340)/2+"px";
 				cloneItem.style.left = itemPos["outerLeft"]+3+"px";
 				cloneItem.style.width = "280px";
-				cloneItem.style.height = "360px";
+				cloneItem.style.height = "340px";
 				//旋转效果
 				//cloneItem.style.webkitTransform = 'rotateY(180deg) scaleX('+(280/cloneItem.clientWidth)+') scaleY('+(360/cloneItem.clientHeight)+')';
 				img.style.webkitTransformStyle = "preserve-3d"
 				cloneItem.style.webkitTransformStyle = "preserve-3d";
 				
 				//动画进行到一半时绑定事件并切换到大图
+				var newImg = new Image();
+				self.onSwitchBig({wrap:newWrap,img:newImg,url:data.url});
 				setTimeout(function(){
-					var newImg = new Image();
+					
 					newImg.onload = function(){
 						img.src = this.src;
 					}
@@ -243,14 +258,17 @@
 						this.parentNode.removeChild(this);
 						item.style.opacity = 1;
 					},false);
+					
 					newWrap.addEventListener("touchmove",function(e){
 						e.preventDefault();
 					},false);
+					
 				},300);
 			},0);
 			
 			
 		},
+		onSwitchBig:function(){},
 		/**
 		 * 获取要放大的元素的初始位置（相对滚动容器）
 		 */
@@ -265,7 +283,7 @@
 			function getOffsetTop(obj,offset){
 				var parNode = obj.offsetParent;
 				offset = offset+obj.offsetTop;
-				console.log(offset);
+				
 				if(parNode!=outerWrapper){
 					return getOffsetTop(parNode,offset);
 				}else{
@@ -275,7 +293,7 @@
 			function getOffsetLeft(obj,offset){
 				var parNode = obj.offsetParent;
 				offset = obj.offsetLeft;
-				console.log(offset);
+				
 				if(parNode!=wrap){
 					return getOffsetLeft(parNode,offset);
 				}else{

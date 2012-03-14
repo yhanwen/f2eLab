@@ -35,9 +35,13 @@ body{
 	padding:0;
 }
 .scroll-area .switch-block {
-	
+	background:#444;
 }
 /*switch page*/
+.switch-block {
+	position:relative;
+	overflow-x:hidden;
+}
 .onSwitch {
 	position:absolute;
 	top:0;

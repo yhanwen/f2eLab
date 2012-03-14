@@ -36,7 +36,7 @@ Router = (function(){
 			if(params.length<=1){
 				self.setHash("index/1");
 			}
-			Control[cfg[params[0]]](params[1]);
+			Control[cfg[params[0]]](params);
 		},
 		setHash:function(str){
 			loc.hash="#"+str;
