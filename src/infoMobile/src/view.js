@@ -167,30 +167,23 @@ View = (function(){
 			title = data["title"],
 			contentHTML = data["content"],
 			page = self.buildNewPage(),
-			//文章容器
-			fragment = doc.createElement("div"),
-			imgs,
+			
 			//文章标题和操作区
 			titleWrap = doc.createElement("div"),
 			//图片数据
-			imgArr = [],
+			imgArr = self._convHTMLtoList(contentHTML),
 			galleryViewItem,
 			detailWrap = doc.createElement("div"),
 			height = _wrapper.parentNode.clientHeight,
 			width = _wrapper.parentNode.clientWidth;
-			//设置内容
-			fragment.innerHTML = contentHTML;
+			
 			//将新页面添加到页面中
 			_wrapper.appendChild(page);
 			//设置detail页容器样式
 			detailWrap.className = "gallery-view-block";
 			detailWrap.style.cssText = "width:"+(width-20)+"px; height:"+height+"px;overflow: visible !important;";
 			page.appendChild(detailWrap);
-			//获取文章中的列表
-			imgs = fragment.querySelectorAll("img");
-			for(k in imgs){
-				imgs[k].src&&imgArr.push({img:imgs[k].src});
-			}
+			
 			//设置标题和操作区
 			titleWrap.className = "title-wrap";
 			titleWrap.innerHTML = "<span>"+title+"</span><a href=''>图文模式</a>";
@@ -200,11 +193,53 @@ View = (function(){
 				wrap:detailWrap,
 				data:imgArr
 			});	
-			
+			//禁用滚动
+			page.ontouchstart = function(e){
+			    e.preventDefault();
+			    e.stopPropagation();
+			}
 			self.showNewPage(page);
 			
 		},
 		/**
+		 * 将文章内容转成图片数据
+		 */
+		_convHTMLtoList:function(HTML,arr){
+		    var self = this,
+		    //文章容器
+            fragment = doc.createElement("div"),
+            imgs,
+            imgArr = arr||[];
+            //设置内容
+            fragment.innerHTML = HTML;
+            //获取文章中的列表
+            imgs = fragment.querySelectorAll("img");
+            for(k in imgs){
+                imgs[k].src&&imgArr.push({img:imgs[k].src});
+            }
+            return imgArr;
+		},
+		/**
+		 * 加载更多图片(或文字数据)
+		 */
+		_loadMoreContent:function(view,olddata){
+		    var self = this,
+		    newImgArr = [],
+		    oldLength,
+		    newContent = "",
+		    isImgMode = (view instanceof galleryView);
+		    DA.getMoreDetailContent(function(data){
+		       if(isImgMode){
+		          newImgArr = self._convHTMLtoList(data.content);
+		          view.updataDataLength(newImgArr.length);
+		          view.next();
+		       }else{
+		          newContent = olddata+data.conent;
+		       }
+		       
+		    });
+		},
+		/**********************************************************************
 		 * 显示正在载入动画
 		 */
 		showLoading:function(){

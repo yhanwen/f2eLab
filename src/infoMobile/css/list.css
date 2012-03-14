@@ -110,7 +110,7 @@
 }
 .gallery-view-block .title-wrap span{
 	padding:15px;
-	margin-right:60px;
+	margin-right:100px;
 	color:#fff;
 	line-height:20px;
 	font-size:14px;
@@ -121,7 +121,18 @@
 .gallery-view-block .title-wrap a {
 	position:absolute;
 	right:10px;
-	top:20px;
+	top:10px;
+	height:26px;
+	line-height:26px;
+	border:solid 1px rgba(255,255,255,0.3);
+	width:60px;
+	text-align:center;
+	color:rgba(255,255,255,1);
+/*	-webkit-text-stroke:#000 1px;*/
+	background:rgba(255,255,255,0.1);
+	-webkit-border-radius:5px;
+	text-shadow:1px 1px 0 #000;
+	-webkit-box-shadow:1px 1px 0 #000;
 }
 .carousel-block > div > .swipeview-loading .swipeview-box, .swipeview-slider img.loading {
 	-webkit-transition-duration: 0s;

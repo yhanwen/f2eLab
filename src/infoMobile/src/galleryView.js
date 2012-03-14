@@ -13,7 +13,9 @@
 		_buildSwipe:function(){
 			var self = this,
 			page, 
-			slides = self.picData;
+			slides = self.picData,
+			endPosition,
+			loadBlock;
 			if (this.picData.length) {
 				var gallery = self.swipe = new SwipeView(this.wrap, {
 					numberOfPages: this.picData.length,
@@ -38,8 +40,30 @@
 							gallery.masterPages[i].appendChild(el);
 						}
 					}
+					if(gallery.page==slides.length-1){
+					    if(!loadBlock){
+    					    endPosition = (gallery.page+1)*gallery.pageWidth;
+    					    loadBlock = document.createElement("div");
+    					    gallery.slider.appendChild(loadBlock);
+    					    loadBlock.style.cssText = "width:100px; height:100%; padding:0 0 0 20px; -webkit-transform:translate3d("+endPosition+"px,0,0)";
+    					    loadBlock.innerHTML = "继续拖动可以载入更多...";
+    					    
+					    }
+					}else {
+					    if(loadBlock){
+					        gallery.slider.removeChild(loadBlock);
+					        loadBlock = null;
+					    }
+					}
 				});
-				
+				gallery.onMaxMove = function(x){
+				    if(x<-100){
+				        loadBlock.innerHTML = "";
+				        self._showLoading(loadBlock);
+				        self.loadMore(gallery);
+				        return 100;
+				    }
+				}
 				gallery.onMoveOut(function () {
 					gallery.masterPages[gallery.currentMasterPage].className = 
 					gallery.masterPages[gallery.currentMasterPage].className.replace(/(^|\s)swipeview-active(\s|$)/, '');
@@ -128,6 +152,25 @@
 				
 			},1000)
 			
+		},
+		/**
+		 * 更新数据长度
+		 */
+		updateDataLength:function(n){
+		    this.swipe.updatePageCount(n);
+		},
+		/**
+		 * 显示下一张
+		 */
+		next:function(){
+		    this.swipe.next();
+		},
+		/**
+		 * 拖动到最后的事件
+		 */
+		loadMore:function(fn){
+		    var self = this;
+		    
 		},
 		/**
 		 * 销毁实例

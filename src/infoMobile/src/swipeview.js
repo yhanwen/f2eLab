@@ -96,7 +96,9 @@ var SwipeView = (function(){
 			this.wrapper.addEventListener('swipeview-touchstart', fn, false);
 			this.customEvents.push(['touchstart', fn]);
 		},
-
+        
+        onMaxMove:function(){},
+        
 		destroy: function () {
 			var i, l;
 			for (i=0, l=this.customEvents.length; i<l; i++) {
@@ -297,6 +299,7 @@ var SwipeView = (function(){
 
 			if (!this.options.loop && (newX > 0 || newX < this.maxX)) {
 				newX = this.x + (deltaX / 2);
+				
 			}
 
 			if (!this.thresholdExceeded && dist >= this.snapThreshold) {
@@ -328,7 +331,12 @@ var SwipeView = (function(){
 				dist = 0;
 				this.__event('movein');
 			}
-
+			if(this.x<this.maxX){
+			    if(this.onMaxMove(this.x-this.maxX)){
+			        this.__pos(this.max+this.onMaxMove(this.x-this.maxX));
+			        return;
+			    };
+			}
 			// Check if we exceeded the snap threshold
 			if (dist < this.snapThreshold) {
 				this.slider.style.webkitTransitionDuration = '300ms';
@@ -395,6 +403,9 @@ var SwipeView = (function(){
 			// Hide the next page if we decided to disable looping
 			if (!this.options.loop) {
 				this.masterPages[pageFlip].style.visibility = newX == 0 || newX == this.maxX ? 'hidden' : '';
+				if(newX==this.maxX){
+				    this.__event('listend');
+				}
 			}
 
 			if (this.x == newX) {
