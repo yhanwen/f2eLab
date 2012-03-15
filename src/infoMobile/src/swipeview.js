@@ -333,7 +333,8 @@ var SwipeView = (function(){
 			}
 			if(this.x<this.maxX){
 			    if(this.onMaxMove(this.x-this.maxX)){
-			        this.__pos(this.max+this.onMaxMove(this.x-this.maxX));
+			        this.slider.style.webkitTransitionDuration = '300ms';
+			        this.__pos(this.maxX+this.onMaxMove(this.x-this.maxX));
 			        return;
 			    };
 			}

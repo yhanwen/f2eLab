@@ -45,7 +45,7 @@
     					    endPosition = (gallery.page+1)*gallery.pageWidth;
     					    loadBlock = document.createElement("div");
     					    gallery.slider.appendChild(loadBlock);
-    					    loadBlock.style.cssText = "width:100px; height:100%; padding:0 0 0 20px; -webkit-transform:translate3d("+endPosition+"px,0,0)";
+    					    loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; -webkit-transform:translate3d("+endPosition+"px,0,0)";
     					    loadBlock.innerHTML = "继续拖动可以载入更多...";
     					    
 					    }
@@ -57,11 +57,11 @@
 					}
 				});
 				gallery.onMaxMove = function(x){
-				    if(x<-100){
+				    if(x<-50){
 				        loadBlock.innerHTML = "";
 				        self._showLoading(loadBlock);
 				        self.loadMore(gallery);
-				        return 100;
+				        return -50;
 				    }
 				}
 				gallery.onMoveOut(function () {
