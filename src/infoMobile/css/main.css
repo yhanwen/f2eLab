@@ -13,7 +13,7 @@ body{
 	position:absolute; z-index:1;
 	top:48px; bottom:0px; left:0;
 	width:100%;
-	background:#2b2b2b;
+	background:#222;
 	overflow:auto;
 }
 .popBigPicWrap {
@@ -36,6 +36,7 @@ body{
 }
 .scroll-area .switch-block {
 	background:#444;
+	-webkit-box-shadow:0 0 10px #000;
 }
 /*switch page*/
 .switch-block {

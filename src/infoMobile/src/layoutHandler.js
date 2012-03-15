@@ -54,7 +54,7 @@ function layoutHandler(el,config){
 					win.scrollTo(0,0);
 				}
 			}else{
-				this.wrapper.style.cssText = 'position:relative; height:auto;top:0;';
+				this.wrapper.style.cssText = 'position:relative; height:auto; min-height:'+(document.body.clientHeight-48)+'px; top:0;';
 				this.wrapper.children[0].style.cssText = "position:relative;";
 				DOM.get("html").style.overflow = "auto";
 			}

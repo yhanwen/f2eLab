@@ -28,10 +28,11 @@ Control = (function(){
 			DA.getDetailData(requestUrl);
 		},
 		listAction:function(params){
-			requestUrl = "http://it.taobao.com/"+params.join("/")+"?tpl=minfo";
+		    var tag = params.pop().split("_");
+			requestUrl = "http://it.taobao.com/"+params.join("/")+"/"+tag[0]+"?tpl=minfo";
 			View.setHeadStatus("list");
 			//获取数据开始渲染
-			DA.getListData(requestUrl);
+			DA.getListData(requestUrl,tag[1]);
 		}
 	}
 })();

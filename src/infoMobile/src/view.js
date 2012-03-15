@@ -7,12 +7,13 @@ View = (function(){
 	canvasInterval,
 	popBigPicWrap,
 	listObjArr=[],
+	curTagname,
 	_wrapper = doc.getElementById("iScrollArea"),
 	_fixTitleWrapper = doc.createElement("div");
 	
 	var layout = new layoutHandler("#wrapper",{
 		onScrollMove:function(){
-			View.fixListTitle();
+			location.href.indexOf("index")>0&&View.fixListTitle();
 		}
 	});
 	layout._init();
@@ -144,7 +145,7 @@ View = (function(){
 			
 			
 			listWrap.className = "scroll-list";
-			listWrap.innerHTML = '<div class="scroll-title"><h3>'+data.tagName+'</h3><a href="#list/'+data.tagId+'/1.php" class="more"></a></div>\
+			listWrap.innerHTML = '<div class="scroll-title"><h3>'+data.tagName+'</h3><a data-tag="" href="#list/'+data.tagId+'/1.php_'+encodeURIComponent(data.tagName)+'" class="more"></a></div>\
 			<div class="list-view"><div class="carousel-block"></div></div>';
 			title = listWrap.querySelector(".scroll-title");
 			scroll = listWrap.querySelector(".carousel-block");
@@ -175,8 +176,14 @@ View = (function(){
 		renderListPage:function(data){
 			var self = this,
 			page = self.buildNewPage(),
-			listWrap = doc.createElement("ul");
+			listWrap = doc.createElement("ul"),
+			title;
 			listWrap.className = "normal-list";
+            
+			page.innerHTML = '<div class="scroll-title"><h3>'+decodeURIComponent(data.tagName)+'</h3></div>';
+			
+			title = page.querySelector(".scroll-title");
+			_fixTitleWrapper.appendChild(title.cloneNode(true));
 			if(!data.items.length)return;
 			_wrapper.appendChild(page);
 			page.appendChild(listWrap);
@@ -190,7 +197,7 @@ View = (function(){
 		_renderListItem:function(data,wrap){
 			var self = this,
 			item = doc.createElement("li"),
-			template = '<a href="'+data["publishUrl"].substr(1)+'"><img src="'+data["pic"]+"_160x160.jpg"+'"/></a>';
+			template = '<a href="#'+data["publishUrl"].substr(1)+'"><img src="'+data["pic"]+"_160x160.jpg"+'"/></a>';
 			item.innerHTML = template;
 			wrap.appendChild(item);
 		},
@@ -384,6 +391,7 @@ View = (function(){
     			loadingCanvas.style.opacity = 0;
     			loadingCanvas.addEventListener("webkitTransitionEnd",function(){
     				try{
+    				    clearInterval(canvasInterval);
 	    				loadingCanvas.parentNode.removeChild(loadingCanvas);
 	    				loadingCanvas = null;
 	    				fn&&fn();

@@ -38,9 +38,12 @@ dataAccess = {
 		self.detailDataHandler = fn;
 		self.jsonp(url);
 	},
-	getListData:function(url,fn){
+	getListData:function(url,tag){
 		var self = this;
 		self.listDataHandle = function(data){
+		    data.tagName = tag;
+		    if(data.items.length%2)
+		      data.items.pop();
 			View.renderListPage(data);
 		}
 		self.jsonp(url);

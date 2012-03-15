@@ -118,7 +118,7 @@
 				span.addEventListener("click",function(e){
 					if(isShow){
 						e.preventDefault();
-						self.onSwitchBig({wrap:null,img:null,url:data.url});
+						self.onSwitchBig({wrap:null,img:null,url:slides[i].url});
 						//self._switchBig(this,slides[i]);
 					}else{
 						isShow = true;
@@ -161,10 +161,7 @@
 				ctx.restore();
 			}
 			drawItem();
-			self.canvasInterval = setInterval(function(){
-				//tag.width = tag.width;
-				//drawItem();
-			},60);
+			
 		},
 
         /**
