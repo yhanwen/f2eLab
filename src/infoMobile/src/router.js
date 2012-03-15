@@ -6,6 +6,7 @@ Router = (function(){
 	//¬∑”…≈‰÷√
 	cfg = {
 		"index":"indexAction",
+		"list":"listAction",
 		"detail":"detailAction"
 	};
 	
@@ -40,6 +41,15 @@ Router = (function(){
 		},
 		setHash:function(str){
 			loc.hash="#"+str;
+		},
+		getNewPage:function(){
+			var hash = loc.hash, 
+			params = _getParam(),
+			len = params.length, 
+			curPage = parseInt(hash.match(/[^\/]+$/i)[0]);
+			params[len-1] = curPage+1+".php";
+			return "data/moreDetailData.php";//"http://infomobile.taobao.com/"+params.join("/");
+			
 		}
 	}
 })();

@@ -26,6 +26,12 @@ Control = (function(){
 			View.setHeadStatus("detail");
 			//获取数据并开始渲染
 			DA.getDetailData(requestUrl);
+		},
+		listAction:function(params){
+			requestUrl = "http://it.taobao.com/"+params.join("/")+"?tpl=minfo";
+			View.setHeadStatus("list");
+			//获取数据开始渲染
+			DA.getListData(requestUrl);
 		}
 	}
 })();

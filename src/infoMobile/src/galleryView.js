@@ -32,35 +32,39 @@
 						i;
 				
 					for (i=0; i<3; i++) {
-						upcoming = gallery.masterPages[i].dataset.upcomingPageIndex;
-						if (upcoming != gallery.masterPages[i].dataset.pageIndex) {
-							el = gallery.masterPages[i].querySelector('swipeview-box');
-							el.parentNode.removeChild(el);
-							el = self._buildItem(upcoming);
-							gallery.masterPages[i].appendChild(el);
-						}
+						try{
+							upcoming = gallery.masterPages[i].dataset.upcomingPageIndex;
+							if (upcoming != gallery.masterPages[i].dataset.pageIndex) {
+								el = gallery.masterPages[i].querySelector('.swipeview-box');
+								el.parentNode.removeChild(el);
+								el = self._buildItem(upcoming);
+								gallery.masterPages[i].appendChild(el);
+							}
+						}catch(e){}
 					}
+					gallery.masterPages[gallery.currentMasterPage].style.visibility = "visible";
 					if(gallery.page==slides.length-1){
-					    if(!loadBlock){
+					    if(!self.loadBlock){
     					    endPosition = (gallery.page+1)*gallery.pageWidth;
-    					    loadBlock = document.createElement("div");
+    					    self.loadBlock = loadBlock = document.createElement("div");
     					    gallery.slider.appendChild(loadBlock);
-    					    loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; -webkit-transform:translate3d("+endPosition+"px,0,0)";
-    					    loadBlock.innerHTML = "继续拖动可以载入更多...";
-    					    
+    					    loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; color:#fff; -webkit-transform:translate3d("+endPosition+"px,0,0)";
+    					    loadBlock.innerHTML = "继续拖动可以载入更多...";  
 					    }
 					}else {
-					    if(loadBlock){
-					        gallery.slider.removeChild(loadBlock);
-					        loadBlock = null;
+					    if(self.loadBlock){
+					        gallery.slider.removeChild(self.loadBlock);
+					        self.loadBlock = null;
 					    }
 					}
 				});
 				gallery.onMaxMove = function(x){
 				    if(x<-50){
 				        loadBlock.innerHTML = "";
-				        self._showLoading(loadBlock);
-				        self.loadMore(gallery);
+				        self._showLoading(loadBlock,true);
+				        setTimeout(function(){
+				        	self.loadMore(gallery);
+				        },1000);
 				        return -50;
 				    }
 				}
@@ -74,6 +78,7 @@
 					/(^|\s)swipeview-active(\s|$)/.test(className) || 
 					(gallery.masterPages[gallery.currentMasterPage].className = 
 						!className ? 'swipeview-active' : className + ' swipeview-active');
+					
 				});
 			}
 		},
@@ -107,10 +112,9 @@
 			};
 			el.onload = loadHandler;
 			el.src = slides[i].img;
-
 			return span;
 		},
-		_showLoading:function(obj){
+		_showLoading:function(obj,flag){
 			var self = this;
 			var tag = document.createElement("canvas"),
 					ctx = tag.getContext("2d"),
@@ -129,13 +133,19 @@
 				count++;
 				for(i=0; i<edges; i++){
 					var color = (i)/edges;
-					ctx.fillStyle = "rgba(0,0,0,"+color+")";
+					ctx.fillStyle = "rgba(255,255,255,"+color+")";
 					ctx.rotate(Math.PI/(edges/2));
 					ctx.fillRect(-1,-10,2,5);
 				} 
 				ctx.restore();
 			}
 			drawItem();
+			if(flag){
+				self.canvasInterval = setInterval(function(){
+					tag.width = tag.width;
+					drawItem();
+				},120);
+			}
 		},
 		_hideLoading:function(obj){
 			var self = this,
@@ -156,14 +166,20 @@
 		/**
 		 * 更新数据长度
 		 */
-		updateDataLength:function(n){
+		updataDataLength:function(n){
 		    this.swipe.updatePageCount(n);
 		},
 		/**
 		 * 显示下一张
 		 */
-		next:function(){
-		    this.swipe.next();
+		goToMore:function(){
+		    var self = this;
+		    if(self.loadBlock){
+		    	self._hideLoading(self.loadBlock);
+			    self.loadBlock.parentNode.removeChild(self.loadBlock);
+			    self.loadBlock=null;
+		    }
+		    self.swipe.goToPage(self.swipe.page+1);
 		},
 		/**
 		 * 拖动到最后的事件

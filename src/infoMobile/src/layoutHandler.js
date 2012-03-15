@@ -2,12 +2,13 @@
  * layoutHandler
  * 处理各种界面变化
  */
-function layoutHandler(el){
+function layoutHandler(el,config){
 	this.scroll;
 	this.wrapper = typeof el == 'object' ? el : DOM.get(el);
 	this.head = DOM.get("header");
 	this.isAndroid = (/android/gi).test(navigator.appVersion);
 	this.isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
+	this.config = config;
 }
 (function(){
 	var doc = document,
@@ -38,11 +39,7 @@ function layoutHandler(el){
 		_buildIScroll:function(){
 			var self = this;
 			if(self.isIDevice){
-				self.scroll = new iScroll(self.wrapper, {
-					onScrollEnd:function(){
-			
-					}
-				});
+				self.scroll = new iScroll(self.wrapper, self.config);
 			}
 			self._resize();
 		},

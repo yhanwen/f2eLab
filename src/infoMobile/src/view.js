@@ -6,9 +6,18 @@ View = (function(){
 	loadingCanvas,
 	canvasInterval,
 	popBigPicWrap,
-	_wrapper = doc.getElementById("iScrollArea");
-	var layout = new layoutHandler("#wrapper");
+	listObjArr=[],
+	_wrapper = doc.getElementById("iScrollArea"),
+	_fixTitleWrapper = doc.createElement("div");
+	
+	var layout = new layoutHandler("#wrapper",{
+		onScrollMove:function(){
+			View.fixListTitle();
+		}
+	});
 	layout._init();
+	doc.querySelector("#wrapper").insertBefore(_fixTitleWrapper);
+	_fixTitleWrapper.style="position:absolute; top:48px; left:0;width:100%; z-index:1000";
 	return {
 		/**
 		 * 修改头部的标签状态
@@ -43,7 +52,9 @@ View = (function(){
             page.style.zIndex=-1;
             page.style.opacity = 0;
             page.style.webkitTransform = "scale3d(1.2,1.2,1)";
-            
+            //清空固定标题位置相关的变量和容器
+            listObjArr = [];
+            _fixTitleWrapper.innerHTML = "";
             !loadingCanvas&&this.showLoading();
 			return page;
 		},
@@ -54,9 +65,6 @@ View = (function(){
 		    var self = this,
 		    oldPage;
 		    page.addEventListener("webkitTransitionEnd",function(){
-               
-               
-               
             },false);
             
             self._scrollToTop(page);
@@ -131,13 +139,14 @@ View = (function(){
 			var self = this,
 			listWrap = doc.createElement("div"),
 			scroll,
-			colViewItem;
+			colViewItem,
+			title;
 			
 			
 			listWrap.className = "scroll-list";
-			listWrap.innerHTML = '<h3>'+data.tagName+'</h3>\
+			listWrap.innerHTML = '<div class="scroll-title"><h3>'+data.tagName+'</h3><a href="#list/'+data.tagId+'/1.php" class="more"></a></div>\
 			<div class="list-view"><div class="carousel-block"></div></div>';
-			
+			title = listWrap.querySelector(".scroll-title");
 			scroll = listWrap.querySelector(".carousel-block");
 			scroll.listData = data.items;
 			page.appendChild(listWrap);
@@ -156,8 +165,91 @@ View = (function(){
 				popBigPicWrap = obj.wrap;
 				Router.setHash(url);
 			};
+			self.setListTitle(listWrap);
 			return listWrap;
 			
+		},
+		/************************************************
+		 * 展开列表页面
+		 */
+		renderListPage:function(data){
+			var self = this,
+			page = self.buildNewPage(),
+			listWrap = doc.createElement("ul");
+			listWrap.className = "normal-list";
+			if(!data.items.length)return;
+			_wrapper.appendChild(page);
+			page.appendChild(listWrap);
+			setTimeout(function(){
+				for(i in data.items){
+					self._renderListItem(data.items[i],listWrap);
+				}
+				self.showNewPage(page);
+			},0);
+		},
+		_renderListItem:function(data,wrap){
+			var self = this,
+			item = doc.createElement("li"),
+			template = '<a href="'+data["publishUrl"].substr(1)+'"><img src="'+data["pic"]+"_160x160.jpg"+'"/></a>';
+			item.innerHTML = template;
+			wrap.appendChild(item);
+		},
+		/**
+		 * 上下滚动时将标题固定在顶部
+		 */
+		setListTitle:function(el){
+			if(!layout.scroll)return;
+			var self = this,
+			scroll = layout.scroll,
+			scrollTop,
+			title = el.querySelector(".scroll-title"),
+			pos = scroll._offset(el),
+			elWidth = el.clientWidth,
+			elHeight = el.clientHeight,
+			elTop,
+			cloneTitle = title.cloneNode(true);
+			pos.left += scroll.wrapperOffsetLeft;
+			pos.top += scroll.wrapperOffsetTop;
+			elTop = Math.abs(pos.top);
+			
+			listObjArr.push({
+				pos:elTop,
+				obj:cloneTitle
+			});
+		},
+		fixListTitle:function(){
+			if(!layout.scroll)return;
+			var self = this,
+			scroll = layout.scroll,
+			scrollTop,
+			elTop,
+			cloneTitle,
+			nextElTop;
+			
+			scrollTop = Math.abs(scroll.y);
+			
+			for(var k=0; k<listObjArr.length; k++){
+				elTop = listObjArr[k].pos;
+				cloneTitle = listObjArr[k].obj;
+				if(listObjArr[k+1]){
+					nextElTop = listObjArr[k+1].pos;
+					if(scrollTop>=elTop&&scrollTop<nextElTop){
+						if(_fixTitleWrapper.firstChild!=cloneTitle){
+							console.log("abc");
+							_fixTitleWrapper.innerHTML="";
+							
+							_fixTitleWrapper.appendChild(cloneTitle);
+						}
+					}
+				}else{
+					if(scrollTop>=elTop){
+						if(_fixTitleWrapper.firstChild!=cloneTitle){
+							_fixTitleWrapper.innerHTML="";
+							_fixTitleWrapper.appendChild(cloneTitle);
+						}
+					}
+				}
+			}
 		},
 		/*******************************************************************
 		 * 渲染详情页
@@ -181,7 +273,7 @@ View = (function(){
 			_wrapper.appendChild(page);
 			//设置detail页容器样式
 			detailWrap.className = "gallery-view-block";
-			detailWrap.style.cssText = "width:"+(width-20)+"px; height:"+height+"px;overflow: visible !important;";
+			detailWrap.style.cssText = "width:"+(width)+"px; height:"+height+"px;overflow: visible !important;";
 			page.appendChild(detailWrap);
 			
 			//设置标题和操作区
@@ -193,6 +285,10 @@ View = (function(){
 				wrap:detailWrap,
 				data:imgArr
 			});	
+			//拖动载入更多
+			galleryViewItem.loadMore = function(){
+				self._loadMoreContent(galleryViewItem,imgArr);
+			}
 			//禁用滚动
 			page.ontouchstart = function(e){
 			    e.preventDefault();
@@ -216,6 +312,7 @@ View = (function(){
             imgs = fragment.querySelectorAll("img");
             for(k in imgs){
                 imgs[k].src&&imgArr.push({img:imgs[k].src});
+                
             }
             return imgArr;
 		},
@@ -230,9 +327,9 @@ View = (function(){
 		    isImgMode = (view instanceof galleryView);
 		    DA.getMoreDetailContent(function(data){
 		       if(isImgMode){
-		          newImgArr = self._convHTMLtoList(data.content);
-		          view.updataDataLength(newImgArr.length);
-		          view.next();
+		          self._convHTMLtoList(data.content,olddata);
+		          view.updataDataLength(olddata.length);
+		          view.goToMore();
 		       }else{
 		          newContent = olddata+data.conent;
 		       }

@@ -109,7 +109,8 @@
 				span.addEventListener("touchend",function(e){
 					if(isShow){
 						e.preventDefault();
-						self._switchBig(this,slides[i]);
+						self.onSwitchBig({wrap:null,img:null,url:data.url});
+						//self._switchBig(this,slides[i]);
 					}else{
 						isShow = true;
 					}
@@ -117,7 +118,8 @@
 				span.addEventListener("click",function(e){
 					if(isShow){
 						e.preventDefault();
-						self._switchBig(this,slides[i]);
+						self.onSwitchBig({wrap:null,img:null,url:data.url});
+						//self._switchBig(this,slides[i]);
 					}else{
 						isShow = true;
 					}
