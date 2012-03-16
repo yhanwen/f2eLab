@@ -48,7 +48,7 @@ Router = (function(){
 			len = params.length, 
 			curPage = parseInt(hash.match(/[^\/]+$/i)[0]);
 			params[len-1] = curPage+1+".php";
-			return "data/moreDetailData.php";//"http://infomobile.taobao.com/"+params.join("/");
+			return "http://it.taobao.com/"+params.join("/")+"?tpl=minfo";
 			
 		}
 	}

@@ -17,24 +17,28 @@ function layoutHandler(el,config){
 		constructor:layoutHandler,
 		_init:function(){
 			var self = this;
-			setTimeout(function(){
-				self._hideHead();
-				self._buildIScroll();
-				self.__windowEventHandler = function(){
-					self._resize();
-				}
-				window.addEventListener("scroll",self.__windowEventHandler,false);
-				window.addEventListener("resize",self.__windowEventHandler,false);
-			},0);
+			self._hideHead();
+			self._buildIScroll();
+			self.__windowEventHandler = function(){
+				self._resize();
+			}
+			window.addEventListener("scroll",self.__windowEventHandler,false);
+			window.addEventListener("resize",self.__windowEventHandler,false);
 			
 		},
 		_hideHead:function(){
 			var self = this;
 			var headerHeight = this.head.offsetHeight,
 			contentHeight = this.wrapper.offsetHeight+headerHeight;
-			this.wrapper.style.height = "1000px";
-			win.scrollTo(0,0);
-			this.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
+			if(self.isIDevice){
+    			this.wrapper.style.height = "1000px";
+    			win.scrollTo(0,0);
+    			this.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
+    			if(self.scroll){
+    			    self._resize();
+    			}
+			}
+			
 		},
 		_buildIScroll:function(){
 			var self = this;

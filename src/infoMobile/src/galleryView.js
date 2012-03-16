@@ -59,13 +59,15 @@
 					}
 				});
 				gallery.onMaxMove = function(x){
-				    if(x<-50){
-				        loadBlock.innerHTML = "";
-				        self._showLoading(loadBlock,true);
-				        setTimeout(function(){
-				        	self.loadMore(gallery);
-				        },1000);
-				        return -50;
+				    if(!View.isLastPage){
+    				    if(x<-50){
+    				        loadBlock.innerHTML = "";
+    				        self._showLoading(loadBlock,true);
+    				        setTimeout(function(){
+    				        	self.loadMore(gallery);
+    				        },1000);
+    				        return -50;
+    				    }
 				    }
 				}
 				gallery.onMoveOut(function () {

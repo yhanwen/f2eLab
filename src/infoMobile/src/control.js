@@ -22,7 +22,7 @@ Control = (function(){
 			DA.getIndexData(requestUrl);
 		},
 		detailAction:function(params){
-			requestUrl = "data/detailData.php";//"http://infomobile.taobao.com/"+params.join("/")
+			requestUrl = "http://it.taobao.com/"+params.join("/")+"?tpl=minfo"
 			View.setHeadStatus("detail");
 			//获取数据并开始渲染
 			DA.getDetailData(requestUrl);

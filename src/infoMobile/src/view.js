@@ -48,6 +48,7 @@ View = (function(){
 		buildNewPage:function(fn){
 			var page = doc.createElement("div"),
             oldPage = _wrapper.querySelector(".switch-block");
+            layout._hideHead();
 			page.className = "switch-block";
             page.style.cssText = "top:0; left:0; width:100%; position:absolute";
             page.style.zIndex=-1;
@@ -57,6 +58,7 @@ View = (function(){
             listObjArr = [];
             _fixTitleWrapper.innerHTML = "";
             !loadingCanvas&&this.showLoading();
+            
 			return page;
 		},
 		/**
@@ -264,7 +266,7 @@ View = (function(){
 		renderDetailPage:function(data){
 			var self = this,
 			title = data["title"],
-			contentHTML = data["content"],
+			contentHTML = data["body"],
 			page = self.buildNewPage(),
 			
 			//文章标题和操作区
@@ -327,21 +329,32 @@ View = (function(){
 		 * 加载更多图片(或文字数据)
 		 */
 		_loadMoreContent:function(view,olddata){
-		    var self = this,
-		    newImgArr = [],
-		    oldLength,
-		    newContent = "",
-		    isImgMode = (view instanceof galleryView);
-		    DA.getMoreDetailContent(function(data){
-		       if(isImgMode){
-		          self._convHTMLtoList(data.content,olddata);
-		          view.updataDataLength(olddata.length);
-		          view.goToMore();
-		       }else{
-		          newContent = olddata+data.conent;
-		       }
-		       
-		    });
+		    
+            var self = this, newImgArr = [], oldLength, newContent = "", isImgMode = ( view instanceof galleryView);
+            
+            DA.getMoreDetailContent(function(data) {
+                var pagelen = (function() {
+                    var pages = data["article_pagination"], i = 0;
+                    for(k in pages)
+                    i++
+                    return i;
+                })(), curPage = parseInt(data["page_current"]);
+                if( curPage = pagelen) {
+                    self.isLastPage = true;
+                } else {
+                    self.isLastPage = false;
+                }
+                if(isImgMode) {
+                    self._convHTMLtoList(data["body"], olddata);
+                    view.updataDataLength(olddata.length);
+                    view.goToMore();
+                } else {
+                    newContent = olddata + data.conent;
+                }
+
+            });
+
+
 		},
 		/**********************************************************************
 		 * 显示正在载入动画

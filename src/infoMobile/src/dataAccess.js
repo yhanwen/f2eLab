@@ -27,7 +27,7 @@ dataAccess = {
 	},
 	getDetailData:function(url,fn){
 		var self = this;
-		self.detailDataHandler = function(data){
+		self.detailDataHandle = function(data){
 			View.renderDetailPage(data);
 		};
 		self.jsonp(url);
@@ -35,7 +35,7 @@ dataAccess = {
 	getMoreDetailContent:function(fn){
 		var self = this,
 		url = Router.getNewPage();
-		self.detailDataHandler = fn;
+		self.detailDataHandle = fn;
 		self.jsonp(url);
 	},
 	getListData:function(url,tag){
