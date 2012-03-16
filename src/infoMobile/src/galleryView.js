@@ -109,7 +109,8 @@
 					self._hideLoading(span);
 					that.style.cssText = "position:absolute;top:50%; left:50%; margin:-"+(that.clientHeight/2)+"px -"+(that.clientWidth/2)+"px auto;"
 					that.style.opacity = 1;
-				},0);
+					that.className = "xxx";
+				},10);
 					
 			};
 			el.onload = loadHandler;

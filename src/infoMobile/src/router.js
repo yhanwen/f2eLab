@@ -20,9 +20,10 @@ Router = (function(){
 		init:function(){
 			var self = this,
 			params = _getParam();
-			
+			this.oldHash = "#index/1";
 			//todo:记录用户状态，设置默认的类目
-			window.addEventListener("hashchange",function(){
+			window.addEventListener("hashchange",function(e){
+				self.oldHash = "#"+e.oldURL.split("#")[1];
 				self.handleParams();
 			},false);
 			if(params.length<=1){
@@ -40,14 +41,18 @@ Router = (function(){
 			Control[cfg[params[0]]](params);
 		},
 		setHash:function(str){
+			this.oldHash = loc.hash;
 			loc.hash="#"+str;
+		},
+		reload:function(){
+			var self = this;
+			self.handleParams();
 		},
 		getNewPage:function(){
 			var hash = loc.hash, 
 			params = _getParam(),
-			len = params.length, 
-			curPage = parseInt(hash.match(/[^\/]+$/i)[0]);
-			params[len-1] = curPage+1+".php";
+			len = params.length;
+			params[len-1] = View.curDetailPage+1+".php";
 			return "http://it.taobao.com/"+params.join("/")+"?tpl=minfo";
 			
 		}
@@ -56,6 +61,7 @@ Router = (function(){
 
 function _main(){
 	window.addEventListener("load",function(){
+		View.init();
 		Router.init();
 	})
 	
