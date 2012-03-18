@@ -5,6 +5,7 @@
 	background:#d82929;
 	position:relative;
 	-webkit-tap-highlight-color:rgba(0,0,0,0);
+	z-index: 1001;
 }
 .logo {
 	width:111px;

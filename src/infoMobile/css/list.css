@@ -122,7 +122,7 @@
 .gallery-view-block .swipeview-box img {
 	min-width: 50%;
 	min-height: 0;
-	max-width: 96%;
+	max-width: 90%;
 	max-height: 95%;
 	-webkit-box-shadow: 0 3px 6px #000;
 	-webkit-border-radius: 10px;
@@ -134,9 +134,9 @@
 	min-height: 50px;
 	background: rgba(0,0,0,0.6);
 	-webkit-border-radius: 5px 5px 0 0;
-	-webkit-transform:translate3d(0,80px,0);
-	left: 0px;
-	right: 0px;
+	-webkit-transform:translate3d(0,80px,0) scale3d(1.5,1.5,1);
+	left: 3px;
+	right: 3px;
 	z-index: 100;
 }
 .title-wrap.show {

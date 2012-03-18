@@ -15,7 +15,7 @@ function layoutHandler(el,config){
 	win = window;
 	layoutHandler.prototype = {
 		constructor:layoutHandler,
-		_init:function(){
+		init:function(){
 			var self = this;
 			self._hideHead();
 			self._buildIScroll();
@@ -24,25 +24,32 @@ function layoutHandler(el,config){
 			}
 			window.addEventListener("scroll",self.__windowEventHandler,false);
 			window.addEventListener("resize",self.__windowEventHandler,false);
-			
+			self.isDestroyed = false;
 		},
 		_hideHead:function(){
 			var self = this;
-			var headerHeight = this.head.offsetHeight,
-			contentHeight = this.wrapper.offsetHeight+headerHeight;
+			var headerHeight = this.head.offsetHeight;
 			if(self.isIDevice){
-    			this.wrapper.style.height = "1000px";
-    			win.scrollTo(0,0);
-    			this.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
-    			if(self.scroll){
-    			    self._resize();
-    			}
+    			
+    			
+    			setTimeout(function(){
+    			    self.wrapper.style.height = "1000px";
+    			    win.scrollTo(0,0);
+    			    self.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
+                    if(self.scroll){
+                        self._resize();
+                    }
+    			},0);
+    			
 			}
 			
 		},
 		_buildIScroll:function(){
 			var self = this;
 			if(self.isIDevice){
+			    self.wrapper.style.cssText = 'position:absolute; height:1000px';
+                self.wrapper.children[0].style.cssText = "position:absolute;";
+                DOM.get("html").style.overflow = "hidden";
 				self.scroll = new iScroll(self.wrapper, self.config);
 			}
 			self._resize();
@@ -52,7 +59,7 @@ function layoutHandler(el,config){
 			if(self.scroll){
 				var headerHeight = this.head.offsetHeight,
 				contentHeight = this.wrapper.offsetHeight+headerHeight;
-				//this.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
+				self.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
 				self.scroll.refresh();
 				if(document.body.scrollTop>0){
 					win.scrollTo(0,0);
@@ -63,7 +70,6 @@ function layoutHandler(el,config){
 				DOM.get("html").style.overflow = "auto";
 			}
 		},
-
 		/**
 		 * 销毁实例
 		 */
@@ -77,8 +83,12 @@ function layoutHandler(el,config){
 			//移除iScroll组件
 			if(self.scroll){
 				self.scroll.destroy();
+				self.scroll = null;
 			}
-			
+			self.wrapper.style.cssText = 'position:relative; height:auto; min-height:'+(document.body.clientHeight-48)+'px; top:0;';
+            self.wrapper.children[0].style.cssText = "position:relative;";
+            DOM.get("html").style.overflow = "auto";
+			self.isDestroyed = true;
 		}
 		
 	}

@@ -258,6 +258,8 @@ iScroll.prototype = {
 	},
 	
 	_pos: function (x, y) {
+	    var that = this;
+	    
 		x = this.hScroll ? x : 0;
 		y = this.vScroll ? y : 0;
 
@@ -272,9 +274,10 @@ iScroll.prototype = {
 
 		this.x = x;
 		this.y = y;
-
+        
 		this._scrollbarPos('h');
 		this._scrollbarPos('v');
+		if (that.options.onScrollMove) that.options.onScrollMove.call(that);
 	},
 
 	_scrollbarPos: function (dir, hidden) {

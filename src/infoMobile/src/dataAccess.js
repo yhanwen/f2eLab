@@ -34,7 +34,7 @@ dataAccess = {
 	},
 	getMoreDetailContent:function(fn){
 		var self = this,
-		url = Router.getNewPage();
+		url = Router.getNewDetailPage();
 		self.detailDataHandle = fn;
 		self.jsonp(url);
 	},
@@ -47,5 +47,15 @@ dataAccess = {
 			View.renderListPage(data);
 		}
 		self.jsonp(url);
+	},
+	getMoreListContent:function(fn){
+	    var self = this,
+        url = Router.getNewListPage();
+        self.listDataHandle = function(data){
+            if(data.items.length%2)
+              data.items.pop();
+            fn(data);
+        };
+        self.jsonp(url);
 	}
 }

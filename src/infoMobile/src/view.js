@@ -15,9 +15,10 @@
     //页面容器
     _wrapper = doc.getElementById("iScrollArea"),
     //用于放置固定的标题使用的容器
-    _fixTitleWrapper = doc.createElement("div");
-    doc.querySelector("#wrapper").insertBefore(_fixTitleWrapper);
-    _fixTitleWrapper.style = "position:absolute; top:48px; left:0;width:100%; z-index:1000";
+    _fixTitleWrapper = doc.createElement("div"),
+    //当前正在显示的标题
+    _curTitle = 0,
+    winHeight;
     
     /**
      * 视图层对象
@@ -30,10 +31,20 @@
             var self = this;
             layout = new layoutHandler("#wrapper", {
                 onScrollMove: function() {
-                    self.onScrollMove();
+                    self.onScrollMove(-layout.scroll.y);
                 }
             });
-            layout._init();
+            var body = doc.body;
+            window.addEventListener("scroll",function(){
+                if(!layout.scroll){
+                     self.onScrollMove(body.scrollTop-48);
+                }
+            });
+            
+            layout.init();
+            doc.querySelector("#wrapper").insertBefore(_fixTitleWrapper);
+            _fixTitleWrapper.style.cssText = "position:absolute; top:0px; left:0;width:100%; z-index:99";
+
         },
         /**
          * iscoll滚动时触发的事件，各页面通过重写该方法来使用
@@ -48,7 +59,9 @@
             logo = doc.querySelector("#siteHead .logo"),
             btn = doc.querySelector("#siteHead .backbtn"),
             link = doc.querySelector("#siteHead .backbtn a");
-            
+            if(layout.isDestroyed){
+                layout.init();
+            }
             if (headTabs[n - 1]) {
                 //切换标签状态
                 link.href = location.hash;
@@ -67,10 +80,15 @@
                 btn.className = "backbtn";
                 logo.className = "logo head-hidden";
             }
+            window.scrollTo(0,0);
+            winHeight = window.innerHeight;
             //显示载入中动画
             this.showLoading();
             //初始化全局变量（详情的标题容器，滚动事件）
             this._removeDetailTitle();
+            //清空固定标题
+            _fixTitleWrapper.innerHTML = "";
+            _fixTitleWrapper.style.webkitTransform="translate3d(0,0,0)";
             this.onScrollMove = function() {};
             /**
              * 初始化用户参数（以后使用本地存储来保存手机用户数据）
@@ -94,12 +112,12 @@
         buildNewPage: function(fn) {
             var page = doc.createElement("div"),
             oldPage = _wrapper.querySelector(".switch-block");
-            layout._hideHead();
+            //layout._hideHead();
             page.className = "switch-block";
             page.style.cssText = "top:0; left:0; width:100%; position:absolute";
             page.style.zIndex = -1;
             page.style.opacity = 0;
-            page.style.webkitTransform = "scale3d(1.2,1.2,1)";
+            layout.scroll&&(page.style.webkitTransform = "scale3d(1.2,1.2,1) translate3d(0,"+(-layout.scroll.y)+"px,0)");
             //清空固定标题位置相关的变量和容器
             listObjArr = [];
 
@@ -124,16 +142,15 @@
                     if (oldPage[1]) _wrapper.removeChild(oldPage[0]);
                 }
                 //返回页面顶部
-                self._scrollToTop(page);
-                //清空固定标题
-                _fixTitleWrapper.innerHTML = "";
+                //if (!oldPage[1])self._scrollToTop(page);
+                
 
                 page.style.webkitTransition = "all 0.4s";
                 setTimeout(function() {
 
                     page.style.webkitTransform = "scale3d(1,1,1)";
                     page.style.opacity = 1;
-
+                    self._scrollToTop(page);
                     setTimeout(function() {
                         page.style.webkitTransition = "all 0s";
                         if (oldPage[1]) ! popBigPicWrap && _wrapper.removeChild(oldPage[0]);
@@ -147,6 +164,7 @@
                         page.style.zIndex = 0;
                         _wrapper.style.zIndex = 0;
                         self.hideLoading();
+                        
                         fn && fn();
                     },
                     600);
@@ -163,7 +181,7 @@
         _scrollToTop: function(page) {
             if (layout.scroll) {
                 layout.scroll.refresh();
-                layout.scroll.scrollToElement(page, 5);
+                layout.scroll.scrollTo(0,0, 400);
             } else {
                 window.scrollTo(0, 0);
             }
@@ -184,6 +202,7 @@
                 self.showNewPage(page);
             },
             0);
+            _curTitle = 0;
             self.onScrollMove = function() {
                 location.href.indexOf("index") > 0 && View.fixListTitle();
             }
@@ -233,7 +252,7 @@
             listWrap = doc.createElement("ul"),
             title;
             listWrap.className = "normal-list";
-
+            self.curListPage = parseInt(data["currentpage"]);
             page.innerHTML = '<div class="scroll-title"><h3>' + decodeURIComponent(data.tagName) + '</h3></div>';
 
             title = page.querySelector(".scroll-title");
@@ -248,6 +267,8 @@
                 self.showNewPage(page,
                 function() {
                     _fixTitleWrapper.appendChild(title.cloneNode(true));
+                    self._loadMoreListItem(page,listWrap);
+                    layout.destroy();
                 });
             },
             0);
@@ -256,13 +277,43 @@
             var self = this,
             item = doc.createElement("li"),
             template = '<a href="#' + data["publishUrl"].substr(1) + '"><img src="' + data["pic"] + "_160x160.jpg" + '"/></a>';
-            item.innerHTML = template;
-            
+            item.innerHTML = template;         
             wrap.appendChild(item);
-            var img = item.querySelector("img");
-            img.onerror = function(e){
-                console.log(img.readyStatus);
+        },
+        /**
+         * 加载更多列表内容
+         */
+        _loadMoreListItem:function(page,listWrap){
+            var self = this;
+            self.onScrollMove = function(y){
+                if (layout.scroll) return;
+                if(!self.isLastPage){
+                    var scroller = _wrapper,
+                    scrollTop = y,
+                    loadBox = doc.createElement("div");
+                    loadBox.className = "text-loading-box";
+                    loadBox.innerHTML = "正在载入更多...";
+                    if(scroller.clientHeight-scrollTop<(window.innerHeight+20)&&! self.loadingMoreList){
+                        page.appendChild(loadBox);
+                        self.loadingMoreList = true;
+                        DA.getMoreListContent(function(data){
+                            self.curListPage = parseInt(data["currentpage"]);
+                            self.loadingMoreList = false;
+                            if(loadBox&&loadBox.parentNode){
+                                loadBox.parentNode.removeChild(loadBox);
+                                loadBox = null;
+                            }
+                            for (i in data.items) {
+                                self._renderListItem(data.items[i], listWrap);
+                            }
+                            
+                        });
+                    }
+                }
             }
+            
+            
+            
         },
         /**
          * 上下滚动时将标题固定在顶部
@@ -290,32 +341,41 @@
             if (!layout.scroll) return;
             var self = this,
             scroll = layout.scroll,
-            scrollTop, elTop, cloneTitle, nextElTop;
+            scrollTop, elTop, cloneTitle, nextElTop,prevElTop;
 
-            scrollTop = Math.abs(scroll.y);
-
-            for (var k = 0; k < listObjArr.length; k++) {
-                elTop = listObjArr[k].pos;
-                cloneTitle = listObjArr[k].obj;
-                if (listObjArr[k + 1]) {
-                    nextElTop = listObjArr[k + 1].pos;
-                    if (scrollTop >= elTop && scrollTop < nextElTop) {
-                        if (_fixTitleWrapper.firstChild != cloneTitle) {
-                            console.log("abc");
-                            _fixTitleWrapper.innerHTML = "";
-
-                            _fixTitleWrapper.appendChild(cloneTitle);
-                        }
-                    }
-                } else {
-                    if (scrollTop >= elTop) {
-                        if (_fixTitleWrapper.firstChild != cloneTitle) {
-                            _fixTitleWrapper.innerHTML = "";
-                            _fixTitleWrapper.appendChild(cloneTitle);
-                        }
-                    }
+            scrollTop = -scroll.y;
+            elTop = listObjArr[_curTitle].pos;
+            cloneTitle = listObjArr[_curTitle].obj;
+            if (listObjArr[_curTitle - 1]) {
+                prevElTop = listObjArr[_curTitle -1].pos
+                if(scrollTop < prevElTop){
+                    _curTitle--;
+                    _fixTitleWrapper.innerHTML = "";
+                    if(_curTitle!=0)_fixTitleWrapper.appendChild(listObjArr[_curTitle-1].obj);
+                    
                 }
             }
+            if (listObjArr[_curTitle + 1]) {
+                nextElTop = listObjArr[_curTitle + 1].pos;
+                
+                if (scrollTop >= elTop && scrollTop < nextElTop) {
+                    if (_fixTitleWrapper.firstChild != cloneTitle) {
+                        _fixTitleWrapper.innerHTML = "";
+                        _fixTitleWrapper.appendChild(cloneTitle);
+                        _curTitle++;
+                    }
+                }
+                if(scrollTop < elTop&&Math.abs(scrollTop-elTop)<_fixTitleWrapper.clientHeight){
+                    _fixTitleWrapper.style.webkitTransform="translate3d(0,-"+(_fixTitleWrapper.clientHeight-Math.abs(scrollTop-elTop))+"px,0)";
+                }else{
+                    _fixTitleWrapper.style.webkitTransform="translate3d(0,0,0)";
+                }
+            }
+            if(scrollTop<0){
+               _fixTitleWrapper.innerHTML = "";
+               _curTitle = 0;
+            }
+
         },
         /*******************************************************************
          * 渲染详情页
@@ -338,7 +398,6 @@
             width = _wrapper.parentNode.clientWidth;
             self.curDetailPage = parseInt(data["page_current"]),
             contentWrap = doc.createElement("div");
-
             //将新页面添加到页面中
             _wrapper.appendChild(page);
             //设置标题和操作区
@@ -384,7 +443,7 @@
                 contentWrap.innerHTML += data["body"].replace(/\.(jpg|png)/g,function($0){
                     return $0+"_160x160.jpg";
                 });
-                self._loadMoreTextDetailPage(contentWrap);
+                
             }
             //插入页面
             self.showNewPage(page,
@@ -393,6 +452,8 @@
                 self._removeDetailTitle();
                 doc.querySelector("#wrapper").appendChild(titleWrap);
                 setTimeout(function(){titleWrap.style.webkitTransform = "translate3d(0,0,0)";},0);
+                if(!self.isImgMode)self._loadMoreTextDetailPage(contentWrap);
+
             });
             self.isLastPage = false;
         },
@@ -404,16 +465,14 @@
          */
         _loadMoreTextDetailPage: function(contentWrap) {
             var self = this;
-            self.onScrollMove = function(){
-                if (!layout.scroll) return;
+            self.onScrollMove = function(y){
                 if(!self.isLastPage){
-                    var scroll = layout.scroll,
-                    scroller = scroll.scroller,
-                    scrollTop = Math.abs(scroll.y),
+                    var scroller = _wrapper,
+                    scrollTop = y,
                     loadBox = doc.createElement("div");
                     loadBox.className = "text-loading-box";
                     loadBox.innerHTML = "正在载入更多...";
-                    if(scroller.clientHeight-scrollTop<700&&! self.loadingMore){
+                    if(scroller.clientHeight-scrollTop<(window.innerHeight+20)&&! self.loadingMore){
                         contentWrap.appendChild(loadBox);
                         self._loadMoreContent(null,null,contentWrap,function(){
                             if(loadBox&&loadBox.parentNode){
@@ -505,6 +564,7 @@
             self.loadingMore = true;
 
         },
+        
         /**********************************************************************
          * 显示正在载入动画
          */
@@ -555,6 +615,7 @@
         hideLoading: function(fn) {
             if (loadingCanvas) {
                 loadingCanvas.style.opacity = 0;
+                loadingCanvas.style.webkitTransform = "scale3d(1.4,1.4,1)";
                 loadingCanvas.addEventListener("webkitTransitionEnd",
                 function() {
                     try {
