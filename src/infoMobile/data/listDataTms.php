@@ -11,9 +11,10 @@
 						{"list":[
 						<cms:repeat row="5" name="e44d8f9a-d300-4694-a3f0-8d73af127641">
 							#if($repeatCount!=1),#end{
-							<cms:text title="标签名称" name="b83f55c0-e7df-488e-9621-48ce0ba5d279">
-								"tagName":"$text",
-							</cms:text>
+							<cms:custom title="标签信息" name="b83f55c0-e7df-488e-9621-48ce0ba5d279" fields="tagname:标签名称:string,tagurl:列表地址:string">
+								"tagName":"$!tagname",
+								"listUrl":"$!listurl",
+							</cms:custom>
 							<cms:articleList row="30" title="标签" name="9f24a887-236b-4f01-b061-484f2b6358e3">
 								"items":[
 								#foreach($item in $elementList)
@@ -21,7 +22,7 @@
 								"title":'$item.title2',
 								"stitle":'$item.title3',
 								"url":"$item.publishedUrl",
-								"img":"$item.image2"
+								"img":"$item.image2" 
 								}
 								#end]
 							</cms:articleList>

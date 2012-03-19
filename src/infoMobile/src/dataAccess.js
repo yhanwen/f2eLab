@@ -19,42 +19,77 @@ dataAccess = {
 	    return node;
 	},
 	getIndexData:function(url,fn){
-		var self = this;
+		var self = this,
+		oldData = localData.getDataWithTime(url);
 		self.indexListHandler = function(data){
 			View.renderTagList(data);
+			localData.setDataWithTime(url,data,1);
 		};
-		self.jsonp(url);
+		if(!oldData){
+		  self.jsonp(url);
+		}else{
+		    self.indexListHandler(oldData);
+		}
 	},
 	getDetailData:function(url,fn){
-		var self = this;
+		var self = this,
+		oldData = localData.getDataWithTime(url);
 		self.detailDataHandle = function(data){
 			View.renderDetailPage(data);
+			localData.setDataWithTime(url,data,1);
 		};
-		self.jsonp(url);
+		if(!oldData){
+          self.jsonp(url);
+        }else{
+            self.detailDataHandle(oldData);
+        }
 	},
 	getMoreDetailContent:function(fn){
 		var self = this,
-		url = Router.getNewDetailPage();
-		self.detailDataHandle = fn;
-		self.jsonp(url);
+		url = Router.getNewDetailPage(),
+		oldData = localData.getDataWithTime(url);
+		self.detailDataHandle = function(data){
+		    fn(data);
+		    localData.setDataWithTime(url,data,1);
+		};
+		if(!oldData){
+          self.jsonp(url);
+        }else{
+            self.detailDataHandle(oldData);
+        }
 	},
 	getListData:function(url,tag){
-		var self = this;
+		var self = this,
+		local = localData.getDataWithTime(url);
 		self.listDataHandle = function(data){
 		    data.tagName = tag;
 		    if(data.items.length%2)
 		      data.items.pop();
+		    localData.setDataWithTime(url,data,1);
 			View.renderListPage(data);
 		}
-		self.jsonp(url);
+		self.curListURL = url;
+		if(!local){
+		  self.jsonp(url);
+		}else{
+		  self.listDataHandle(local);
+		}
 	},
 	getMoreListContent:function(fn){
 	    var self = this,
-        url = Router.getNewListPage();
+        url = Router.getNewListPage(),
+        oldData = localData.getDataWithTime(self.curListURL);
         self.listDataHandle = function(data){
             if(data.items.length%2)
               data.items.pop();
             fn(data);
+            //将新数据拼到旧数据的本地数据中
+            if(!oldData)return;
+            for(var i=0; i<data.items.length; i++){
+                oldData.items.push(data.items[i]);
+            }
+            oldData["currentpage"] = data["currentpage"];
+            localData.setDataWithTime(self.curListURL,oldData,1);
         };
         self.jsonp(url);
 	}

@@ -169,6 +169,7 @@ var SwipeView = (function(){
 				this.masterPages[2].dataset.upcomingPageIndex = this.page == 0 ? this.options.numberOfPages-1 : this.page - 1;
 				this.masterPages[0].dataset.upcomingPageIndex = this.page;
 				this.masterPages[1].dataset.upcomingPageIndex = this.page == this.options.numberOfPages-1 ? 0 : this.page + 1;
+				
 			} else if (this.currentMasterPage == 1) {
 				this.masterPages[0].style.left = this.page * 100 - 100 + '%';
 				this.masterPages[1].style.left = this.page * 100 + '%';
@@ -186,7 +187,10 @@ var SwipeView = (function(){
 				this.masterPages[2].dataset.upcomingPageIndex = this.page;
 				this.masterPages[0].dataset.upcomingPageIndex = this.page == this.options.numberOfPages-1 ? 0 : this.page + 1;
 			}
-			
+			// Hide the next page if we decided to disable looping
+            if (!this.options.loop) {
+                this.masterPages[this.currentMasterPage%2+1].style.visibility = this.options.numberOfPages-1==this.page ? 'hidden' : '';
+            }
 			this.__flip();
 		},
 		
@@ -414,9 +418,6 @@ var SwipeView = (function(){
 			// Hide the next page if we decided to disable looping
 			if (!this.options.loop) {
 				this.masterPages[pageFlip].style.visibility = newX == 0 || newX == this.maxX ? 'hidden' : '';
-				if(newX==this.maxX){
-				    this.__event('listend');
-				}
 			}
 
 			if (this.x == newX) {

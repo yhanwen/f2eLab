@@ -18,6 +18,8 @@
     _fixTitleWrapper = doc.createElement("div"),
     //当前正在显示的标题
     _curTitle = 0,
+    //上次浏览list页时的位置
+    lastListPos = 0,
     winHeight;
     
     /**
@@ -73,6 +75,10 @@
                 //设置并显示返回按钮
                 if (n == "detail") {
                     link.href = Router.oldHash;
+                    //如果不是返回列表页则清空
+                    if(Router.oldHash.indexOf("list")==-1){
+                        lastListPos = 0;
+                    }
                 }
                 if (n == "list") {
                     link.href = "#index/1";
@@ -80,7 +86,7 @@
                 btn.className = "backbtn";
                 logo.className = "logo head-hidden";
             }
-            window.scrollTo(0,0);
+            if(layout.scroll)layout._hideHead();
             winHeight = window.innerHeight;
             //显示载入中动画
             this.showLoading();
@@ -218,7 +224,7 @@
             title;
 
             listWrap.className = "scroll-list";
-            listWrap.innerHTML = '<div class="scroll-title"><h3>' + data.tagName + '</h3><a data-tag="" href="#list/' + data.tagId + '/1.php_' + encodeURIComponent(data.tagName) + '" class="more"></a></div>\
+            listWrap.innerHTML = '<div class="scroll-title"><h3>' + data.tagName + '</h3><a data-tag="" href="#' + data.listUrl + '_' + encodeURIComponent(data.tagName) + '" class="more"></a></div>\
             <div class="list-view"><div class="carousel-block"></div></div>';
             title = listWrap.querySelector(".scroll-title");
             scroll = listWrap.querySelector(".carousel-block");
@@ -249,60 +255,87 @@
         renderListPage: function(data) {
             var self = this,
             page = self.buildNewPage(),
-            listWrap = doc.createElement("ul"),
-            title;
+            listWrap = doc.createElement("ul");
             listWrap.className = "normal-list";
             self.curListPage = parseInt(data["currentpage"]);
             page.innerHTML = '<div class="scroll-title"><h3>' + decodeURIComponent(data.tagName) + '</h3></div>';
 
-            title = page.querySelector(".scroll-title");
-
+            
             if (!data.items.length) return;
             _wrapper.appendChild(page);
             page.appendChild(listWrap);
             setTimeout(function() {
-                for (i in data.items) {
+                for (var i=0; i< Math.min(data.items.length,Math.max(10,(parseInt((lastListPos/200)+2))*2)); i++) {
+                    self.curListItemNum = i;
                     self._renderListItem(data.items[i], listWrap);
                 }
                 self.showNewPage(page,
                 function() {
-                    _fixTitleWrapper.appendChild(title.cloneNode(true));
-                    self._loadMoreListItem(page,listWrap);
+
+                    self._loadMoreListItem(page,listWrap,data.items);
                     layout.destroy();
+                    window.scrollTo(0,lastListPos);
                 });
             },
             0);
         },
         _renderListItem: function(data, wrap) {
             var self = this,
+            isScroll = false,
             item = doc.createElement("li"),
             template = '<a href="#' + data["publishUrl"].substr(1) + '"><img src="' + data["pic"] + "_160x160.jpg" + '"/></a>';
-            item.innerHTML = template;         
+            item.innerHTML = template;
+            
+            //发生点击时记录位置
+            item.addEventListener("touchstart",function(){
+                isScroll = false;
+            }); 
+            item.addEventListener("touchend",function(){
+                isScroll = true;
+            }); 
+            item.addEventListener("touchend",function(){
+                if(isScroll)return;
+                lastListPos = doc.body.scrollTop;
+                wrap.parentNode.style.opacity=0;
+            }); 
+            item.addEventListener("click",function(){
+                lastListPos = doc.body.scrollTop;
+                wrap.parentNode.style.opacity=0;
+            });         
             wrap.appendChild(item);
         },
         /**
          * 加载更多列表内容
          */
-        _loadMoreListItem:function(page,listWrap){
+        _loadMoreListItem:function(page,listWrap,items){
             var self = this;
+            var scroller = _wrapper,
+            scrollTop,
+            loadBox = doc.createElement("div");
+            loadBox.className = "text-loading-box";
+            loadBox.innerHTML = "正在载入更多...";
+            page.appendChild(loadBox);
             self.onScrollMove = function(y){
                 if (layout.scroll) return;
                 if(!self.isLastPage){
-                    var scroller = _wrapper,
-                    scrollTop = y,
-                    loadBox = doc.createElement("div");
-                    loadBox.className = "text-loading-box";
-                    loadBox.innerHTML = "正在载入更多...";
+                    scrollTop = y;
                     if(scroller.clientHeight-scrollTop<(window.innerHeight+20)&&! self.loadingMoreList){
-                        page.appendChild(loadBox);
+                        if(self.curListItemNum<items.length-1){
+                            var cur = self.curListItemNum,i;
+                            for(i = cur+1 ; i<Math.min(items.length,cur+11); i++){
+                                self.curListItemNum = i;
+                                self._renderListItem(items[i], listWrap);
+                            }
+                            return;
+                        }
                         self.loadingMoreList = true;
                         DA.getMoreListContent(function(data){
                             self.curListPage = parseInt(data["currentpage"]);
                             self.loadingMoreList = false;
-                            if(loadBox&&loadBox.parentNode){
-                                loadBox.parentNode.removeChild(loadBox);
-                                loadBox = null;
-                            }
+                            // if(loadBox&&loadBox.parentNode){
+                                // loadBox.parentNode.removeChild(loadBox);
+                                // loadBox = null;
+                            // }
                             for (i in data.items) {
                                 self._renderListItem(data.items[i], listWrap);
                             }
@@ -381,6 +414,7 @@
          * 渲染详情页
          */
         renderDetailPage: function(data) {
+            if(!data)return;
             var self = this,
             title = data["title"],
             contentHTML = data["body"],

@@ -11,6 +11,7 @@
 	width:111px;
 	height:24px;
 	background:url(../images/logo.png) no-repeat;
+	background-size:100%;
 	text-indent:-2000px;
 	overflow:hidden;
 	position:relative;

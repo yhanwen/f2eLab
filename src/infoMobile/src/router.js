@@ -7,6 +7,7 @@ Router = (function(){
 	cfg = {
 		"index":"indexAction",
 		"list":"listAction",
+		"tag":"listAction",
 		"detail":"detailAction"
 	};
 	

@@ -23,9 +23,18 @@
 				});
 				for (i=0; i<3; i++) {
 					page = i==0 ? slides.length-1 : i-1;
-					el = self._buildItem(page);
-					gallery.masterPages[i].appendChild(el);
+					if(slides[page]){
+        				el = self._buildItem(page);
+        				gallery.masterPages[i].appendChild(el);
+					}
 				}
+				if(!self.loadBlock){
+                    endPosition = (gallery.options.numberOfPages)*gallery.pageWidth;
+                    self.loadBlock = loadBlock = document.createElement("div");
+                    gallery.slider.appendChild(loadBlock);
+                    loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; color:#fff; -webkit-transform:translate3d("+endPosition+"px,0,0)";
+                    loadBlock.innerHTML = "继续拖动可以载入更多...";  
+                }
 				gallery.onFlip(function () {
 					var el,
 						upcoming,
@@ -34,29 +43,18 @@
 					for (i=0; i<3; i++) {
 						try{
 							upcoming = gallery.masterPages[i].dataset.upcomingPageIndex;
-							if (upcoming != gallery.masterPages[i].dataset.pageIndex) {
-								el = gallery.masterPages[i].querySelector('.swipeview-box');
-								el.parentNode.removeChild(el);
-								el = self._buildItem(upcoming);
-								gallery.masterPages[i].appendChild(el);
+							if (upcoming != gallery.masterPages[i].dataset.pageIndex||!gallery.masterPages[i].querySelector('.swipeview-box')) {
+							    if(slides[upcoming]){
+    								el = gallery.masterPages[i].querySelector('.swipeview-box');
+    								if(el)
+    								    el.parentNode.removeChild(el);
+    								el = self._buildItem(upcoming);
+    								gallery.masterPages[i].appendChild(el);
+								}
 							}
 						}catch(e){}
 					}
 					gallery.masterPages[gallery.currentMasterPage].style.visibility = "visible";
-					if(gallery.page==slides.length-1){
-					    if(!self.loadBlock){
-    					    endPosition = (gallery.page+1)*gallery.pageWidth;
-    					    self.loadBlock = loadBlock = document.createElement("div");
-    					    gallery.slider.appendChild(loadBlock);
-    					    loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; color:#fff; -webkit-transform:translate3d("+endPosition+"px,0,0)";
-    					    loadBlock.innerHTML = "继续拖动可以载入更多...";  
-					    }
-					}else {
-					    if(self.loadBlock){
-					        gallery.slider.removeChild(self.loadBlock);
-					        self.loadBlock = null;
-					    }
-					}
 				});
 				gallery.onMaxMove = function(x){
 				    if(!View.isLastPage){
@@ -91,22 +89,25 @@
 			loadHandler;
 			
 			var img = document.createElement("img"),
+			realImg = new Image(),
 			span = document.createElement("div");
 			span.className = "swipeview-box";
 			span.appendChild(img);
+			span.appendChild(realImg);
 			el = img;
 			
-			
+			realImg.style.display="none";
 			//el.style.webkitTransition = "all 0s";
 			self._showLoading(span);
 			el.src="";
 			el.style.opacity = 0;
+			realImg.style.opacity = 0;
 			loadHandler = function (e) { 
 				var that = e.currentTarget;
 				//that.style.cssText = "-webkit-transform:translate3d("+((viewWidth-that.clientWidth)/2)+"px,"+((viewHeight-that.clientHeight)/2)+"px,0)";
 				setTimeout(function(){
 					
-					self._hideLoading(span);
+					
 					that.style.cssText = "position:absolute;top:50%; left:50%; margin:-"+(that.clientHeight/2)+"px -"+(that.clientWidth/2)+"px auto;"
 					that.style.opacity = 1;
 					that.className = "xxx";
@@ -114,7 +115,19 @@
 					
 			};
 			el.onload = loadHandler;
-			el.src = slides[i].img;
+			el.src = slides[i].img+"_60x60.jpg";
+			realImg.onload = function(e){
+			    var that = e.currentTarget;
+			    self._hideLoading(span);
+			    realImg.style.display="block";
+			    span.removeChild(el);
+			    setTimeout(function(){
+        			    that.style.cssText = "position:absolute;top:50%; left:50%; margin:-"+(that.clientHeight/2)+"px -"+(that.clientWidth/2)+"px auto;"
+                        that.style.opacity = 1;
+                        that.className = "xxx";
+                },10);
+			}
+			realImg.src = slides[i].img+"_670x670.jpg";
 			return span;
 		},
 		_showLoading:function(obj,flag){
@@ -176,11 +189,13 @@
 		 * 显示下一张
 		 */
 		goToMore:function(){
-		    var self = this;
+		    var self = this,
+		    endPosition,
+		    gallery = self.swipe;
 		    if(self.loadBlock){
-		    	self._hideLoading(self.loadBlock);
-			    self.loadBlock.parentNode.removeChild(self.loadBlock);
-			    self.loadBlock=null;
+		        endPosition = (gallery.options.numberOfPages)*gallery.pageWidth;
+                self.loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; color:#fff; -webkit-transform:translate3d("+endPosition+"px,0,0)";
+                self.loadBlock.innerHTML = "继续拖动可以载入更多..."; 
 		    }
 		    self.swipe.goToPage(self.swipe.page+1);
 		},
