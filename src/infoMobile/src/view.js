@@ -74,7 +74,9 @@
             } else {
                 //设置并显示返回按钮
                 if (n == "detail") {
-                    link.href = Router.oldHash;
+                    if(Router.oldHash.indexOf("detail")==-1){
+                        link.href = Router.oldHash;
+                    }
                     //如果不是返回列表页则清空
                     if(Router.oldHash.indexOf("list")==-1){
                         lastListPos = 0;
@@ -432,6 +434,22 @@
             width = _wrapper.parentNode.clientWidth;
             self.curDetailPage = parseInt(data["page_current"]),
             contentWrap = doc.createElement("div");
+            //获取总页数
+            var pagelen = (function() {
+                var pages = data["article_pagination"],
+                i = 0;
+                for (k in pages)
+                i++
+                return i;
+            })();
+            //获取当前页
+            self.curDetailPage = parseInt(data["page_current"]);
+            //判断是不是最后一页
+            if (self.curDetailPage == pagelen) {
+                self.isLastPage = true;
+            } else {
+                self.isLastPage = false;
+            }
             //将新页面添加到页面中
             _wrapper.appendChild(page);
             //设置标题和操作区
@@ -457,7 +475,9 @@
                 //初始化详情页视图
                 galleryViewItem = new galleryView({
                     wrap: detailWrap,
-                    data: imgArr
+                    data: imgArr,
+                    relationList:'<ul class="relation-article"><li>相关文章：</li>'+data["correlationArticle"].replace(/href='\//ig,"href='#").replace(/_blank/g,"")+'</ul>',
+                    isLastPage:self.isLastPage
                 });
                 //拖动载入更多
                 galleryViewItem.loadMore = function() {
@@ -465,8 +485,13 @@
                 }
                 //禁用滚动
                 page.ontouchstart = function(e) {
-                    e.preventDefault();
+                    if(e.target.tagName.toLowerCase()!="a")
+                        e.preventDefault();
                     e.stopPropagation();
+                }
+                page.ontouchmove = function(e) {
+                    if(e.target.tagName.toLowerCase()=="a")
+                        e.preventDefault();
                 }
             } else {
                 //图文模式初始化
@@ -546,7 +571,7 @@
          */
         _loadMoreContent: function(view, olddata, contentWrap,fn) {
 
-            var self = this;
+            var self = this, html="";
 
             ! self.loadingMore && DA.getMoreDetailContent(function(data) {
                 if (data) {
@@ -574,7 +599,10 @@
                         self._convHTMLtoList(data["body"], olddata);
                         view.updataDataLength(olddata.length);
                         setTimeout(function() {
-                            view.goToMore();
+                            if(self.isLastPage){
+                                html = '<ul class="relation-article">'+data["correlationArticle"].replace(/href='\//ig,"href='#").replace("_blank","")+'</ul>';
+                            }
+                            view.goToMore(self.isLastPage,html);
                         },
                         200);
                     }else{

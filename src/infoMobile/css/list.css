@@ -232,3 +232,39 @@
 	font-size:16px;
 	text-align: center;
 }
+.relation-article {
+	text-align:left;
+	background:#ffffff;
+	-webkit-border-radius:10px;
+	-webkit-box-shadow:0 0 5px rgba(0,0,0,0.8);
+	-webkit-box-sizing: border-box;
+	top: 10px;
+	position: absolute;
+	left: 10px;
+	right: 10px;
+}
+.relation-article li{
+	height:40px;
+	-webkit-box-sizing: border-box;
+	border-top:dotted 1px #ccc;
+	position:relative;
+	-webkit-tap-highlight-color:rgba(0,0,0,0.1);
+}
+.relation-article li:first-of-type{
+	border:0;
+	font-size:16px;
+	font-weight:bold;
+	color:#333;
+	line-height:40px;
+	padding-left:10px;
+}
+.relation-article li a {
+	display:block;
+	line-height:40px;
+	padding-left:10px;
+	color:#888;
+	font-size:14px;
+}
+.relation-article li a:hover {
+	text-decoration: none;
+}

@@ -18,45 +18,47 @@ dataAccess = {
 	    head.insertBefore(node, head.firstChild);
 	    return node;
 	},
+	useLocalData:function(url,fn){
+	    var self = this,
+	    oldData = localData.getDataWithTime(url);
+	    if(oldData){
+	        setTimeout(function(){
+	            fn(oldData);
+	        },10);
+	    }else{
+	        self.jsonp(url)
+	    }
+	    return oldData;
+	},
 	getIndexData:function(url,fn){
-		var self = this,
-		oldData = localData.getDataWithTime(url);
+		var self = this,oldData;
 		self.indexListHandler = function(data){
 			View.renderTagList(data);
-			localData.setDataWithTime(url,data,1);
+			if(oldData!=data)
+			 localData.setDataWithTime(url,data,1);
 		};
-		if(!oldData){
-		  self.jsonp(url);
-		}else{
-		    self.indexListHandler(oldData);
-		}
+		oldData = self.useLocalData(url,self.indexListHandler);
 	},
 	getDetailData:function(url,fn){
 		var self = this,
-		oldData = localData.getDataWithTime(url);
+		oldData;
 		self.detailDataHandle = function(data){
 			View.renderDetailPage(data);
-			localData.setDataWithTime(url,data,1);
+			if(oldData!=data)
+			 localData.setDataWithTime(url,data,1);
 		};
-		if(!oldData){
-          self.jsonp(url);
-        }else{
-            self.detailDataHandle(oldData);
-        }
+		oldData = self.useLocalData(url,self.detailDataHandle);
 	},
 	getMoreDetailContent:function(fn){
 		var self = this,
 		url = Router.getNewDetailPage(),
-		oldData = localData.getDataWithTime(url);
+		oldData;
 		self.detailDataHandle = function(data){
 		    fn(data);
-		    localData.setDataWithTime(url,data,1);
+		    if(oldData!=data)
+		      localData.setDataWithTime(url,data,1);
 		};
-		if(!oldData){
-          self.jsonp(url);
-        }else{
-            self.detailDataHandle(oldData);
-        }
+		oldData = self.useLocalData(url,self.detailDataHandle);
 	},
 	getListData:function(url,tag){
 		var self = this,

@@ -6,6 +6,8 @@
 		this.picData = config.data;
 		this.wrap = config.wrap;
 		this.swipe = null;
+		this.relationList = config.relationList;
+		this.isLastPage = config.isLastPage;
 		this._buildSwipe();
 	}
 	galleryView.prototype={
@@ -26,6 +28,8 @@
 					if(slides[page]){
         				el = self._buildItem(page);
         				gallery.masterPages[i].appendChild(el);
+					}else if(self.isLastPage){
+					    gallery.masterPages[i].innerHTML = self.relationList;
 					}
 				}
 				if(!self.loadBlock){
@@ -44,12 +48,14 @@
 						try{
 							upcoming = gallery.masterPages[i].dataset.upcomingPageIndex;
 							if (upcoming != gallery.masterPages[i].dataset.pageIndex||!gallery.masterPages[i].querySelector('.swipeview-box')) {
-							    if(slides[upcoming]){
-    								el = gallery.masterPages[i].querySelector('.swipeview-box');
-    								if(el)
-    								    el.parentNode.removeChild(el);
+							    if(slides[upcoming]&&upcoming!=0){
+    								gallery.masterPages[i].innerHTML="";
     								el = self._buildItem(upcoming);
     								gallery.masterPages[i].appendChild(el);
+								}else if(View.isLastPage){
+								    self.updataDataLength(slides.length+1);
+								    gallery.masterPages[i].innerHTML = self.relationList;
+								    gallery.masterPages[i].style.visibility = "visible";
 								}
 							}
 						}catch(e){}
@@ -66,6 +72,9 @@
     				        },1000);
     				        return -50;
     				    }
+				    }else{
+				        
+				        self.goToMore(true);
 				    }
 				}
 				gallery.onMoveOut(function () {
@@ -188,14 +197,18 @@
 		/**
 		 * 显示下一张
 		 */
-		goToMore:function(){
+		goToMore:function(isLastPage){
 		    var self = this,
 		    endPosition,
 		    gallery = self.swipe;
-		    if(self.loadBlock){
+		    if(self.loadBlock&&!isLastPage){
 		        endPosition = (gallery.options.numberOfPages)*gallery.pageWidth;
                 self.loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; color:#fff; -webkit-transform:translate3d("+endPosition+"px,0,0)";
                 self.loadBlock.innerHTML = "继续拖动可以载入更多..."; 
+		    }
+		    if(self.loadBlock&&isLastPage){
+		        self.loadBlock.parentNode.removeChild(self.loadBlock);
+		        self.loadBlock = null;
 		    }
 		    self.swipe.goToPage(self.swipe.page+1);
 		},
