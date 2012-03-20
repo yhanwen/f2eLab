@@ -64,6 +64,10 @@
             if(layout.isDestroyed){
                 layout.init();
             }
+            if(userData.get("index") == "index/2"){
+                curTab.setAttribute("class", "");
+                headTabs[1].className = "cur";
+            }
             if (headTabs[n - 1]) {
                 //切换标签状态
                 link.href = location.hash;
@@ -78,12 +82,12 @@
                         link.href = Router.oldHash;
                     }
                     //如果不是返回列表页则清空
-                    if(Router.oldHash.indexOf("list")==-1){
+                    if(Router.oldHash.indexOf("list")==-1&&Router.oldHash.indexOf("tag")==-1){
                         lastListPos = 0;
                     }
                 }
                 if (n == "list") {
-                    link.href = "#index/1";
+                    link.href = "#"+userData.get("index");
                 }
                 btn.className = "backbtn";
                 logo.className = "logo head-hidden";
@@ -476,7 +480,7 @@
                 galleryViewItem = new galleryView({
                     wrap: detailWrap,
                     data: imgArr,
-                    relationList:'<ul class="relation-article"><li>相关文章：</li>'+data["correlationArticle"].replace(/href='\//ig,"href='#").replace(/_blank/g,"")+'</ul>',
+                    relationList:'<div class="relation-article"><ul><li>相关文章：</li>'+data["correlationArticle"].replace(/href='\//ig,"href='#").replace(/_blank/g,"")+'</ul></div>',
                     isLastPage:self.isLastPage
                 });
                 //拖动载入更多
@@ -485,13 +489,10 @@
                 }
                 //禁用滚动
                 page.ontouchstart = function(e) {
-                    if(e.target.tagName.toLowerCase()!="a")
-                        e.preventDefault();
-                    e.stopPropagation();
+                    
                 }
                 page.ontouchmove = function(e) {
-                    if(e.target.tagName.toLowerCase()=="a")
-                        e.preventDefault();
+                    
                 }
             } else {
                 //图文模式初始化
@@ -636,36 +637,43 @@
                 var ctx = tag.getContext("2d"),
                 count = 0,
                 edges = 12,
-                i;
+                i,
+                mask = doc.createElement("div");
+                mask.className="J_loadingMask";
                 doc.body.appendChild(tag);
-                tag.width = 140;
-                tag.height = 90;
-                tag.style.cssText = "position:absolute; top:50%; left:50%; margin:-30px 0 0 -70px; -webkit-transition:all 0.4s;-webkit-border-radius:5px;z-index:10000; background:rgba(0,0,0,0.7);";
+                doc.body.appendChild(mask);
+                tag.width = 280;
+                tag.height = 180;
+                tag.style.cssText = "position:absolute; top:50%; left:50%; margin:-60px 0 0 -140px;-webkit-transform:scale3d(0.5,0.5,1); -webkit-transition:all 0.4s;-webkit-border-radius:15px;z-index:10000; background:rgba(0,0,0,0.7);";
+                mask.style.cssText = "position:fixed; top:0; left:0; width:100%; height:1000px; background:rgba(0,0,0,0.1);z-index:9999;";
+                mask.addEventListener("touchmove",function(e){
+                    e.preventDefault();
+                });
                 function drawItem() {
                     ctx.save();
-                    ctx.translate(30, tag.height / 2);
+                    ctx.translate(60, tag.height / 2);
                     ctx.rotate(Math.PI * count / (edges / 2));
                     count++;
                     for (i = 0; i < edges; i++) {
                         var color = (i) / edges;
                         ctx.fillStyle = "rgba(255,255,255," + color + ")";
                         ctx.rotate(Math.PI / (edges / 2));
-                        ctx.fillRect( - 1, -10, 2, 5);
+                        ctx.fillRect( - 2, -20, 4, 10);
                     }
 
                     ctx.restore();
                     ctx.save();
-                    ctx.translate(30, tag.height / 2);
+                    ctx.translate(60, tag.height / 2);
                     ctx.fillStyle = "rgba(255,255,255,1)";
-                    ctx.font = "16px Arial";
-                    ctx.fillText("载入中...", 20, 5);
+                    ctx.font = "32px Arial";
+                    ctx.fillText("载入中...", 40, 10);
                     ctx.restore();
 
                 }
 
                 drawItem();
                 canvasInterval = setInterval(function() {
-                    ctx.clearRect(0, 0, 100, 60);
+                    ctx.clearRect(0, 0, 280, 180);
                     drawItem();
                 },
                 120);
@@ -675,15 +683,20 @@
          * 隐藏载入中动画
          */
         hideLoading: function(fn) {
+            var mask = doc.querySelector(".J_loadingMask");
             if (loadingCanvas) {
                 loadingCanvas.style.opacity = 0;
-                loadingCanvas.style.webkitTransform = "scale3d(1.4,1.4,1)";
+                loadingCanvas.style.webkitTransform = "scale3d(1,1,1)";
                 loadingCanvas.addEventListener("webkitTransitionEnd",
                 function() {
                     try {
                         clearInterval(canvasInterval);
                         canvasInterval = null;
                         loadingCanvas.parentNode.removeChild(loadingCanvas);
+                        if(mask){
+                            mask.parentNode.removeChild(mask);
+                            mask = null;
+                        }
                         loadingCanvas = null;
                         fn && fn();
                     } catch(e) {}

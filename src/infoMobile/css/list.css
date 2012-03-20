@@ -239,9 +239,17 @@
 	-webkit-box-shadow:0 0 5px rgba(0,0,0,0.8);
 	-webkit-box-sizing: border-box;
 	top: 10px;
+	bottom:50px;
 	position: absolute;
 	left: 10px;
 	right: 10px;
+	z-index: 1;
+	overflow:hidden;
+}
+.relation-article ul {
+	position: absolute;
+	z-index: 1;
+	width:100%;
 }
 .relation-article li{
 	height:40px;

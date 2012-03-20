@@ -21,7 +21,7 @@ Router = (function(){
 		init:function(){
 			var self = this,
 			params = _getParam();
-			this.oldHash = "#index/1";
+			this.oldHash = "#"+userData.get("index");
 			//todo:记录用户状态，设置默认的类目
 			self.curHash = loc.hash;
 			window.onhashchange = function(e){
@@ -42,7 +42,7 @@ Router = (function(){
 			    // },100);
 			// }
 			if(params.length<=1){
-				self.setHash("index/1");
+				self.setHash(userData.get("index"));
 			}else{
 				self.handleParams();
 			}
@@ -51,7 +51,7 @@ Router = (function(){
 			var self = this,
 			params = _getParam();
 			if(params.length<=1){
-				self.setHash("index/1");
+				self.setHash(userData.get("index"));
 			}
 			Control[cfg[params[0]]](params);
 		},
@@ -84,8 +84,10 @@ Router = (function(){
 
 function _main(){
 	window.addEventListener("load",function(){
+	    userData.init();
 		View.init();
 		Router.init();
+		
 	})
 	
 }

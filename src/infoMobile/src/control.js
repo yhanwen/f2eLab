@@ -7,9 +7,11 @@ Control = (function() {
             switch(id) {
                 case "1":
                     requestUrl = "data/listData.php";
+                    userData.set("index","index/"+1);
                     break;
                 case "2":
                     requestUrl = "http://www.taobao.com/go/chn/test/asdfkjasklaklsdfjljsdfkl.php";
+                    userData.set("index","index/"+2);
                     break;
                 default:
                     return false;

@@ -59,7 +59,7 @@ function layoutHandler(el,config){
 			if(self.scroll){
 				var headerHeight = this.head.offsetHeight,
 				contentHeight = this.wrapper.offsetHeight+headerHeight;
-				self.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
+				//self.wrapper.style.height = DOM.getInnerHeight()-headerHeight+"px";
 				self.scroll.refresh();
 				if(document.body.scrollTop>0){
 					win.scrollTo(0,0);

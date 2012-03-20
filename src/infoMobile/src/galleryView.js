@@ -8,6 +8,7 @@
 		this.swipe = null;
 		this.relationList = config.relationList;
 		this.isLastPage = config.isLastPage;
+		this.relationItem;
 		this._buildSwipe();
 	}
 	galleryView.prototype={
@@ -28,8 +29,9 @@
 					if(slides[page]){
         				el = self._buildItem(page);
         				gallery.masterPages[i].appendChild(el);
-					}else if(self.isLastPage){
+					}else if(self.isLastPage&&!document.querySelector(".relation-article")){
 					    gallery.masterPages[i].innerHTML = self.relationList;
+					    self._buildRelationIscroll();
 					}
 				}
 				if(!self.loadBlock){
@@ -52,10 +54,11 @@
     								gallery.masterPages[i].innerHTML="";
     								el = self._buildItem(upcoming);
     								gallery.masterPages[i].appendChild(el);
-								}else if(View.isLastPage){
+								}else if(View.isLastPage&&!document.querySelector(".relation-article")){
 								    self.updataDataLength(slides.length+1);
 								    gallery.masterPages[i].innerHTML = self.relationList;
 								    gallery.masterPages[i].style.visibility = "visible";
+								    self._buildRelationIscroll();
 								}
 							}
 						}catch(e){}
@@ -72,9 +75,6 @@
     				        },1000);
     				        return -50;
     				    }
-				    }else{
-				        
-				        self.goToMore(true);
 				    }
 				}
 				gallery.onMoveOut(function () {
@@ -90,6 +90,16 @@
 					
 				});
 			}
+		},
+		_buildRelationIscroll:function(){
+		    var scroll = document.querySelector(".relation-article");
+            scroll.addEventListener("touchmove",function(e){
+                e.stopPropagation();
+            });
+            scroll.addEventListener("touchstart",function(e){
+                e.stopPropagation();
+            });
+            new iScroll(scroll);
 		},
 		_buildItem:function(i){
 			var el,page,
@@ -107,7 +117,7 @@
 			
 			realImg.style.display="none";
 			//el.style.webkitTransition = "all 0s";
-			self._showLoading(span);
+			self._showLoading(span,true);
 			el.src="";
 			el.style.opacity = 0;
 			realImg.style.opacity = 0;
@@ -147,10 +157,10 @@
 					edges = 10,
 					i;
 			obj.appendChild(tag);
-			tag.width = 30;
-			tag.height = 30;
+			tag.width = 80;
+			tag.height = 80;
 			obj.style.position="relative";
-			tag.style.cssText = "position:absolute; top:50%; left:50%; margin:-15px 0 0 -15px; -webkit-transition:all 1s";
+			tag.style.cssText = "position:absolute; top:50%; left:50%; margin:-40px 0 0 -40px; -webkit-transform:scale3d(0.5,0.5,1); -webkit-transition:all 1s; background:rgba(0,0,0,0.5); -webkit-border-radius:5px;";
 			function drawItem(){
 				ctx.save();
 				ctx.translate(tag.width/2,tag.height/2);
@@ -160,12 +170,13 @@
 					var color = (i)/edges;
 					ctx.fillStyle = "rgba(255,255,255,"+color+")";
 					ctx.rotate(Math.PI/(edges/2));
-					ctx.fillRect(-1,-10,2,5);
+					ctx.fillRect(-2,-20,4,10);
 				} 
 				ctx.restore();
 			}
 			drawItem();
 			if(flag){
+			    clearInterval(self.canvasInterval);
 				self.canvasInterval = setInterval(function(){
 					tag.width = tag.width;
 					drawItem();
