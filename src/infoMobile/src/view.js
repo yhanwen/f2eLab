@@ -27,6 +27,10 @@
      */
     View = {
         /**
+         * detail页是否是大图模式
+         */
+        isImgMode:true,
+        /**
          * 初始化
          */
         init: function() {
@@ -56,7 +60,8 @@
          * 修改头部的状态
          */
         setHeadStatus: function(n, fn) {
-            var headTabs = doc.querySelectorAll("#headNav a"),
+            var self = this,
+            headTabs = doc.querySelectorAll("#headNav a"),
             curTab = doc.querySelector("#headNav .cur"),
             logo = doc.querySelector("#siteHead .logo"),
             btn = doc.querySelector("#siteHead .backbtn"),
@@ -105,7 +110,7 @@
             /**
              * 初始化用户参数（以后使用本地存储来保存手机用户数据）
              */
-            View.isImgMode = (typeof View.isImgMode == "undefined") ? true: View.isImgMode;
+            View.isImgMode = self._getDetailMode();
             //执行回调
             fn && fn();
         },
@@ -184,7 +189,7 @@
                 40);
 
             },
-            1000)
+            300)
 
         },
         /**
@@ -464,6 +469,7 @@
             function(e) {
                 e.preventDefault();
                 self.isImgMode = !self.isImgMode;
+                self._setDetailMode();
                 Router.reload();
             });
 
@@ -480,7 +486,7 @@
                 galleryViewItem = new galleryView({
                     wrap: detailWrap,
                     data: imgArr,
-                    relationList:'<div class="relation-article"><ul><li>相关文章：</li>'+data["correlationArticle"].replace(/href='\//ig,"href='#").replace(/_blank/g,"")+'</ul></div>',
+                    relationList:'<div class="relation-article"><ul><li>相关文章：<a href="#" class="back-to-first">返回第一张大图</a></li>'+data["correlationArticle"].replace(/href='\//ig,"href='#").replace(/_blank/g,"")+'</ul></div>',
                     isLastPage:self.isLastPage
                 });
                 //拖动载入更多
@@ -516,6 +522,12 @@
 
             });
             self.isLastPage = false;
+        },
+        _getDetailMode:function(){
+            return userData.get("isImgMode");
+        },
+        _setDetailMode:function(){
+            userData.set("isImgMode",this.isImgMode);
         },
         _removeDetailTitle: function() {
             if (doc.querySelector("#wrapper .title-wrap")) doc.querySelector("#wrapper").removeChild(doc.querySelector("#wrapper .title-wrap"));

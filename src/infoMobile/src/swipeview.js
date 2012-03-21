@@ -189,7 +189,10 @@ var SwipeView = (function(){
 			}
 			// Hide the next page if we decided to disable looping
             if (!this.options.loop) {
-                this.masterPages[this.currentMasterPage%2+1].style.visibility = this.options.numberOfPages-1==this.page ? 'hidden' : '';
+                var next = this.currentMasterPage==2?0:this.currentMasterPage+1,
+                prev = this.currentMasterPage==0?2:this.currentMasterPage-1;
+                this.masterPages[next].style.visibility = this.options.numberOfPages-1==this.page ? 'hidden' : '';
+                this.masterPages[prev].style.visibility = 0==this.page ? 'hidden' : '';
             }
 			this.__flip();
 		},

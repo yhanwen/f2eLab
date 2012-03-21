@@ -50,12 +50,14 @@
 						try{
 							upcoming = gallery.masterPages[i].dataset.upcomingPageIndex;
 							if (upcoming != gallery.masterPages[i].dataset.pageIndex||!gallery.masterPages[i].querySelector('.swipeview-box')) {
-							    if(slides[upcoming]&&upcoming!=0){
+							    if(slides[upcoming]&&!(!self.relationListShow&&upcoming==0)){
     								gallery.masterPages[i].innerHTML="";
     								el = self._buildItem(upcoming);
     								gallery.masterPages[i].appendChild(el);
 								}else if(View.isLastPage&&!document.querySelector(".relation-article")){
+								    self.relationListShow = true;
 								    self.updataDataLength(slides.length+1);
+								    gallery.masterPages[i].dataset.upcomingPageIndex = slides.length;
 								    gallery.masterPages[i].innerHTML = self.relationList;
 								    gallery.masterPages[i].style.visibility = "visible";
 								    self._buildRelationIscroll();
@@ -92,7 +94,13 @@
 			}
 		},
 		_buildRelationIscroll:function(){
-		    var scroll = document.querySelector(".relation-article");
+		    var self = this,
+		    scroll = document.querySelector(".relation-article"),
+		    btn = document.querySelector(".back-to-first");
+		    btn.onclick = function(e){
+		        e.preventDefault();
+		        self.swipe.goToPage(0);
+		    }
             scroll.addEventListener("touchmove",function(e){
                 e.stopPropagation();
             });

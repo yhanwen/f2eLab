@@ -29,6 +29,10 @@ userData = {
         /**
          * 用户正在使用的主页
          */
-        index:"index/1"
+        index:"index/1",
+        /**
+         * 详情页是否使用大图模式
+         */
+        isImgMode:true
     }
 }
