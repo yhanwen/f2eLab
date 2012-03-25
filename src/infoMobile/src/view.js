@@ -232,7 +232,8 @@
             listWrap = doc.createElement("div"),
             scroll,
             colViewItem,
-            title;
+            title,
+            showScroll;
 
             listWrap.className = "scroll-list";
             listWrap.innerHTML = '<div class="scroll-title"><h3>' + data.tagName + '</h3><a data-tag="" href="#' + data.listUrl + '_' + encodeURIComponent(data.tagName) + '" class="more"></a></div>\
@@ -241,21 +242,26 @@
             scroll = listWrap.querySelector(".carousel-block");
             scroll.listData = data.items;
             page.appendChild(listWrap);
-            //初始化colview组件
-            colViewItem = new colView({
-                el: scroll,
-                scroll: layout.scroll,
-                data: data.items,
-                equalHeight: true
-            });
-            //展开打图时显示detail页
-            colViewItem.onSwitchBig = function(obj) {
-                var url = obj.url;
-                //处理url地址
-                url = url.replace(/http:\/\/[^\/]+\//i, "");
-                popBigPicWrap = obj.wrap;
-                Router.setHash(url);
+            showScroll = function(d){
+                console.log(title.innerHTML);
+                //初始化colview组件
+                colViewItem = new colView({
+                    el: scroll,
+                    scroll: layout.scroll,
+                    data: d.items,
+                    equalHeight: true
+                });
+                //展开打图时显示detail页
+                colViewItem.onSwitchBig = function(obj) {
+                    var url = obj.url;
+                    //处理url地址
+                    url = url.replace(/http:\/\/[^\/]+\//i, "");
+                    popBigPicWrap = obj.wrap;
+                    Router.setHash(url);
+                };
             };
+            DA.getIndexScrollData(Router.getUrl(data.listUrl),showScroll);
+            
             self.setListTitle(listWrap);
             return listWrap;
 

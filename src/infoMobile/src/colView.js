@@ -101,7 +101,7 @@
 					self._hideLoading(span);
 	
 				}
-				el.src = slides[i].img+"_160x160.jpg";
+				el.src = slides[i].pic+"_160x160.jpg";
 				
 				span.addEventListener("touchmove",function(e){
 					isShow = false;

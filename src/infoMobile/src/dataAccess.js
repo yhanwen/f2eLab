@@ -39,6 +39,18 @@ dataAccess = {
 		};
 		oldData = self.useLocalData(url,self.indexListHandler);
 	},
+	getIndexScrollData:function(url,fn){
+	    var self = this,
+        oldData;
+        self.listDataHandle = function(data){
+            if(data.items.length%2)
+              data.items.pop();
+           if(oldData!=data)
+                localData.setDataWithTime(url,data,1);
+            fn&&fn(data);
+        }
+        oldData = self.useLocalData(url,self.listDataHandle);
+	},
 	getDetailData:function(url,fn){
 		var self = this,
 		oldData;
@@ -62,20 +74,18 @@ dataAccess = {
 	},
 	getListData:function(url,tag){
 		var self = this,
-		local = localData.getDataWithTime(url);
+		oldData;
 		self.listDataHandle = function(data){
 		    data.tagName = tag;
 		    if(data.items.length%2)
 		      data.items.pop();
-		    localData.setDataWithTime(url,data,1);
+		    if(oldData!=data)
+                localData.setDataWithTime(url,data,1);
 			View.renderListPage(data);
 		}
 		self.curListURL = url;
-		if(!local){
-		  self.jsonp(url);
-		}else{
-		  self.listDataHandle(local);
-		}
+
+		oldData = self.useLocalData(url,self.listDataHandle);
 	},
 	getMoreListContent:function(fn){
 	    var self = this,

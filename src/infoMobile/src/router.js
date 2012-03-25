@@ -63,6 +63,9 @@ Router = (function(){
 			var self = this;
 			self.handleParams();
 		},
+		getUrl:function(url){
+		    return "http://it.taobao.com/"+url+"?tpl=minfo";
+		},
 		getNewDetailPage:function(){
 			var hash = loc.hash, 
 			params = _getParam(),
