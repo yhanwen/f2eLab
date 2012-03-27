@@ -39,17 +39,22 @@ dataAccess = {
 		};
 		oldData = self.useLocalData(url,self.indexListHandler);
 	},
-	getIndexScrollData:function(url,fn){
+	getIndexScrollData:function(reqList){
 	    var self = this,
+        cur = 0,
         oldData;
         self.listDataHandle = function(data){
+            
             if(data.items.length%2)
               data.items.pop();
-           if(oldData!=data)
-                localData.setDataWithTime(url,data,1);
-            fn&&fn(data);
+            if(oldData!=data)
+              localData.setDataWithTime(reqList[cur].url,data,1);
+            reqList[cur].fn(data);
+            cur++;
+            if(reqList[cur])
+                oldData = self.useLocalData(reqList[cur].url,self.listDataHandle);
         }
-        oldData = self.useLocalData(url,self.listDataHandle);
+        oldData = self.useLocalData(reqList[cur].url,self.listDataHandle);
 	},
 	getDetailData:function(url,fn){
 		var self = this,

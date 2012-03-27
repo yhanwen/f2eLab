@@ -38,8 +38,9 @@
                     endPosition = (gallery.options.numberOfPages)*gallery.pageWidth;
                     self.loadBlock = loadBlock = document.createElement("div");
                     gallery.slider.appendChild(loadBlock);
-                    loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; color:#fff; -webkit-transform:translate3d("+endPosition+"px,0,0)";
-                    loadBlock.innerHTML = "继续拖动可以载入更多...";  
+                    loadBlock.className = "will-loading-more";
+                    loadBlock.style.cssText = "-webkit-transform:translate3d("+endPosition+"px,0,0)";
+                    loadBlock.innerHTML = "";  
                 }
 				gallery.onFlip(function () {
 					var el,
@@ -70,12 +71,12 @@
 				gallery.onMaxMove = function(x){
 				    if(!View.isLastPage){
     				    if(x<-50){
-    				        loadBlock.innerHTML = "";
-    				        self._showLoading(loadBlock,true);
+    				        loadBlock.className = "will-loading-more being-loading-more";
+    				        //self._showLoading(loadBlock,true);
     				        setTimeout(function(){
     				        	self.loadMore(gallery);
     				        },1000);
-    				        return -50;
+    				        return -80;
     				    }
 				    }
 				}
@@ -222,8 +223,9 @@
 		    gallery = self.swipe;
 		    if(self.loadBlock&&!isLastPage){
 		        endPosition = (gallery.options.numberOfPages)*gallery.pageWidth;
-                self.loadBlock.style.cssText = "width:30px; height:100%; padding:0 0 0 20px; color:#fff; -webkit-transform:translate3d("+endPosition+"px,0,0)";
-                self.loadBlock.innerHTML = "继续拖动可以载入更多..."; 
+                self.loadBlock.className = "will-loading-more";
+                self.loadBlock.style.cssText = "-webkit-transform:translate3d("+endPosition+"px,0,0)";
+                self.loadBlock.innerHTML = ""; 
 		    }
 		    if(self.loadBlock&&isLastPage){
 		        self.loadBlock.parentNode.removeChild(self.loadBlock);

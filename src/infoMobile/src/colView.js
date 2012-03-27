@@ -118,7 +118,7 @@
 				span.addEventListener("click",function(e){
 					if(isShow){
 						e.preventDefault();
-						self.onSwitchBig({wrap:null,img:null,url:slides[i].url});
+						self.onSwitchBig({wrap:null,img:null,url:slides[i].publishUrl});
 						//self._switchBig(this,slides[i]);
 					}else{
 						isShow = true;

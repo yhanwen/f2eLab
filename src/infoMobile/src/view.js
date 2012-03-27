@@ -20,6 +20,11 @@
     _curTitle = 0,
     //上次浏览list页时的位置
     lastListPos = 0,
+    //index请求队列
+    indexReqList,
+    //初次载入
+    firstLoad = true,
+    pageLoaded = false,
     winHeight;
     
     /**
@@ -99,8 +104,10 @@
             }
             if(layout.scroll)layout._hideHead();
             winHeight = window.innerHeight;
+            pageLoaded  = false;
             //显示载入中动画
-            this.showLoading();
+            this.showLoading(firstLoad);
+            firstLoad  = false;
             //初始化全局变量（详情的标题容器，滚动事件）
             this._removeDetailTitle();
             //清空固定标题
@@ -198,7 +205,7 @@
         _scrollToTop: function(page) {
             if (layout.scroll) {
                 layout.scroll.refresh();
-                layout.scroll.scrollTo(0,0, 400);
+                layout.scroll.scrollTo(0,0, 0);
             } else {
                 window.scrollTo(0, 0);
             }
@@ -213,9 +220,11 @@
 
             _wrapper.appendChild(page);
             setTimeout(function() {
+                indexReqList=[];
                 for (i in data.list) {
-                    self._renderScrollList(data.list[i], page);
+                    self._renderScrollList(data.list[i], page,i);
                 }
+                DA.getIndexScrollData(indexReqList);
                 self.showNewPage(page);
             },
             0);
@@ -227,7 +236,7 @@
         /**
          * 渲染水平列表块
          */
-        _renderScrollList: function(data, page, fn) {
+        _renderScrollList: function(data, page, i) {
             var self = this,
             listWrap = doc.createElement("div"),
             scroll,
@@ -243,7 +252,6 @@
             scroll.listData = data.items;
             page.appendChild(listWrap);
             showScroll = function(d){
-                console.log(title.innerHTML);
                 //初始化colview组件
                 colViewItem = new colView({
                     el: scroll,
@@ -255,12 +263,12 @@
                 colViewItem.onSwitchBig = function(obj) {
                     var url = obj.url;
                     //处理url地址
-                    url = url.replace(/http:\/\/[^\/]+\//i, "");
+                    url = url.substr(1);
                     popBigPicWrap = obj.wrap;
                     Router.setHash(url);
                 };
             };
-            DA.getIndexScrollData(Router.getUrl(data.listUrl),showScroll);
+            indexReqList.push({url:Router.getUrl(data.listUrl),fn:showScroll});
             
             self.setListTitle(listWrap);
             return listWrap;
@@ -547,9 +555,23 @@
                 if(!self.isLastPage){
                     var scroller = _wrapper,
                     scrollTop = y,
+                    count = 0,
+                    text = "正在载入更多",
+                    interval,
                     loadBox = doc.createElement("div");
                     loadBox.className = "text-loading-box";
-                    loadBox.innerHTML = "正在载入更多...";
+                    loadBox.innerHTML = text;
+                    interval = setInterval(function(){
+                        if(loadBox){
+                            loadBox.innerHTML = text;
+                            for(var i=0; i<count%4; i++){
+                                loadBox.innerHTML+=".";
+                            }
+                            count++;
+                        }else{
+                            clearInterval(interval);
+                        }
+                    },400);
                     if(scroller.clientHeight-scrollTop<(window.innerHeight+20)&&! self.loadingMore){
                         contentWrap.appendChild(loadBox);
                         self._loadMoreContent(null,null,contentWrap,function(){
@@ -649,17 +671,26 @@
         /**********************************************************************
          * 显示正在载入动画
          */
-        showLoading: function() {
+        showLoading: function(flag) {
             if (!canvasInterval) {
                 var tag = loadingCanvas = document.createElement("canvas");
+                var back = doc.createElement("a");
                 var ctx = tag.getContext("2d"),
                 count = 0,
                 edges = 12,
                 i,
                 mask = doc.createElement("div");
+                if(!flag){
+                    back.href = "javascript:history.go(-1)";
+                    back.className = "J_cancleLoading";
+                    back.innerHTML = "取消";
+                    back.style.cssText = "position:absolute; width:80px; height:40px; line-height:40px; -webkit-border-radius:5px;background:rgba(0,0,0,0.6); color:#fff; font-size:14px; text-align:center;left:50%; margin-left:-40px; top:50%; margin-top:100px;z-index:10000;";
+                    setTimeout(function(){if(!pageLoaded)doc.body.appendChild(back);},4000);
+                }
                 mask.className="J_loadingMask";
                 doc.body.appendChild(tag);
                 doc.body.appendChild(mask);
+                
                 tag.width = 280;
                 tag.height = 180;
                 tag.style.cssText = "position:absolute; top:50%; left:50%; margin:-60px 0 0 -140px;-webkit-transform:scale3d(0.5,0.5,1); -webkit-transition:all 0.4s;-webkit-border-radius:15px;z-index:10000; background:rgba(0,0,0,0.7);";
@@ -701,10 +732,17 @@
          * 隐藏载入中动画
          */
         hideLoading: function(fn) {
-            var mask = doc.querySelector(".J_loadingMask");
+            var mask = doc.querySelector(".J_loadingMask"),
+            back = doc.querySelector(".J_cancleLoading");
+            if(back){
+                back.parentNode.removeChild(back);
+                back = null;
+            }
+            pageLoaded  = true;
             if (loadingCanvas) {
                 loadingCanvas.style.opacity = 0;
                 loadingCanvas.style.webkitTransform = "scale3d(1,1,1)";
+                
                 loadingCanvas.addEventListener("webkitTransitionEnd",
                 function() {
                     try {
@@ -715,6 +753,7 @@
                             mask.parentNode.removeChild(mask);
                             mask = null;
                         }
+                        
                         loadingCanvas = null;
                         fn && fn();
                     } catch(e) {}
