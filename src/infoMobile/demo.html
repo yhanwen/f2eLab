@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
-<html manifest="">
+<html manifest="http://www.taobao.com/go/chn/minfo/version.php">
 	<head>
 		<meta charset="gbk">
 		<title>淘宝门户首页</title>
@@ -7,11 +7,12 @@
 		<!-- 响应式设计代码 -->
 		<meta name="viewport" content="width=320, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
 		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 		<!--不自动将地址和email转为链接-->
 		<meta name="format-detection" content="address=no;email=no" />
 		<!--添加到主屏时的图标-->
 		<link rel="apple-touch-icon-precomposed" href="http://img02.taobaocdn.com/tps/i2/T1iHa2XgljXXXXXXXX-114-114.png">
+		<link rel="apple-touch-startup-image" href="http://img01.taobaocdn.com/tps/i1/T1scS5Xi8cXXXXXXXX-320-460.png">
 		<link rel="stylesheet" href="css/reset.css"/>
 		<link rel="stylesheet" href="css/main.css"/>
 		<link rel="stylesheet" href="css/head.css"/>
@@ -55,7 +56,6 @@
 		<script type="text/javascript" src="src/galleryView.js"></script>
 		<script type="text/javascript" src="src/userData.js"></script>
 		<script type="text/javascript">
-			if(navigator.onLine=="online")window.applicationCache.update();
 			_main();
 		</script>
 	</body>

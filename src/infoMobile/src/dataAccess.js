@@ -60,7 +60,7 @@ dataAccess = {
 		var self = this,
 		oldData;
 		self.detailDataHandle = function(data){
-			View.renderDetailPage(data);
+			setTimeout(function(){View.renderDetailPage(data);},150);
 			if(oldData!=data)
 			 localData.setDataWithTime(url,data,1);
 		};

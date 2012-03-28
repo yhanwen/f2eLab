@@ -86,7 +86,26 @@ Router = (function(){
 })();
 
 function _main(){
+
 	window.addEventListener("load",function(){
+	    window.applicationCache.addEventListener("updateready", function(e) {
+
+        　　if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+        
+            　　// Browser downloaded a new app cache.
+            
+            　　// Swap it in and reload the page to get the new hotness.
+            
+        　    　window.applicationCache.swapCache();
+                window.location.reload();
+        
+        　　} else {
+        
+        　　// Manifest didn¨t changed. Nothing new to server.
+        
+        　　}
+        
+        　　}, false);
 	    userData.init();
 		View.init();
 		Router.init();

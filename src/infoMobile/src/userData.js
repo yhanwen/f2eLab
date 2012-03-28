@@ -23,7 +23,7 @@ userData = {
      * 初始化并获取本地数据
      */
     init:function(){
-      this.data = localData.getData("userData")||this.data;  
+      this.data = localData.getData("userData")||this.data;
     },
     data:{
         /**

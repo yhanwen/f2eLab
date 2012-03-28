@@ -65,8 +65,24 @@ function layoutHandler(el,config){
 					win.scrollTo(0,0);
 				}
 			}else{
-				this.wrapper.style.cssText = 'position:relative; height:auto; min-height:'+(document.body.clientHeight-48)+'px; top:0;';
-				this.wrapper.children[0].style.cssText = "position:relative;";
+				this.wrapper.style.cssText = 'position:relative; height:auto; min-height:'+(window.innerHeight-48)+'px; top:0;';
+				this.wrapper.children[0].style.cssText = "position:relative;"+'min-height:'+(window.innerHeight-48)+'px;';
+				if(this.wrapper.querySelector('.gallery-view-block')){
+				    if(window.innerHeight<400){
+				        this.wrapper.style.height = 450+"px";
+				        win.scrollTo(0,1);
+				    }
+				    setTimeout(function(){
+				        this.wrapper.style.height = (window.innerHeight-48)+'px';
+                        this.wrapper.children[0].style.height = (window.innerHeight-48)+'px';
+                        this.wrapper.querySelector(".gallery-view-block").style.height = (window.innerHeight-48)+'px';
+                        win.scrollTo(0,0);
+				    },100)
+				    
+				}else{
+				    this.wrapper.style.height = 'auto';
+				    this.wrapper.children[0].style.height = "auto";
+				}
 				DOM.get("html").style.overflow = "auto";
 			}
 		},

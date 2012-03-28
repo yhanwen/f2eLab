@@ -4,10 +4,17 @@
     LS = win.localStorage;
     
     function _get(name){
-        return LS.getItem(name);
+        try{
+            return LS.getItem(name);
+        }catch(e){
+            return null;
+        }
     }
     function _getData(name){
-        return JSON.parse(_get(name));
+        var data = _get(name);
+        if(!data)
+            return null;
+        return JSON.parse(data);
     }
     /**
      * 获取没有过期的数据
@@ -30,7 +37,12 @@
     
     
     function _set(name,str){
-        return LS.setItem(name,str);
+        try{
+            return LS.setItem(name,str);
+        }catch(e){
+            return null;
+        }
+        
     }
     function _setData(name,data){
         return _set(name,JSON.stringify(data));

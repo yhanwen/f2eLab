@@ -24,6 +24,19 @@
 					numberOfPages: this.picData.length,
 					loop:false
 				});
+				window.addEventListener("resize",function(){
+				    if(gallery&&gallery.refreshSize){
+				        setTimeout(function(){
+                            for (i=0; i<3; i++) {
+                                var img = gallery.masterPages[i].querySelector("img");
+                                img.style.marginLeft = -img.clientWidth/2+"px";
+                                img.style.marginTop = -img.clientHeight/2+"px";   
+
+                            }
+                        },30);
+				        
+				    }
+				});
 				for (i=0; i<3; i++) {
 					page = i==0 ? slides.length-1 : i-1;
 					if(slides[page]){

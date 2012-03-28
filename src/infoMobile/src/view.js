@@ -188,7 +188,7 @@
                         page.style.zIndex = 0;
                         _wrapper.style.zIndex = 0;
                         self.hideLoading();
-                        
+                        layout._resize();
                         fn && fn();
                     },
                     600);
@@ -440,6 +440,7 @@
          */
         renderDetailPage: function(data) {
             if(!data)return;
+
             var self = this,
             title = data["title"],
             contentHTML = data["body"],
@@ -453,7 +454,7 @@
             imgArr = self._convHTMLtoList(contentHTML),
             galleryViewItem,
             detailWrap = doc.createElement("div"),
-            height = _wrapper.parentNode.clientHeight,
+            height = window.innerHeight-48,
             width = _wrapper.parentNode.clientWidth;
             self.curDetailPage = parseInt(data["page_current"]),
             contentWrap = doc.createElement("div");
@@ -684,7 +685,7 @@
                     back.href = "javascript:history.go(-1)";
                     back.className = "J_cancleLoading";
                     back.innerHTML = "È¡Ïû";
-                    back.style.cssText = "position:absolute; width:80px; height:40px; line-height:40px; -webkit-border-radius:5px;background:rgba(0,0,0,0.6); color:#fff; font-size:14px; text-align:center;left:50%; margin-left:-40px; top:50%; margin-top:100px;z-index:10000;";
+                    back.style.cssText = "position:fixed; width:80px; height:40px; line-height:40px; -webkit-border-radius:5px;background:rgba(0,0,0,0.6); color:#fff; font-size:14px; text-align:center;left:"+(window.innerWidth/2-40)+"px;top:"+(window.innerHeight/2+140)+"px;z-index:10000;";
                     setTimeout(function(){if(!pageLoaded)doc.body.appendChild(back);},4000);
                 }
                 mask.className="J_loadingMask";
@@ -693,7 +694,7 @@
                 
                 tag.width = 280;
                 tag.height = 180;
-                tag.style.cssText = "position:absolute; top:50%; left:50%; margin:-60px 0 0 -140px;-webkit-transform:scale3d(0.5,0.5,1); -webkit-transition:all 0.4s;-webkit-border-radius:15px;z-index:10000; background:rgba(0,0,0,0.7);";
+                tag.style.cssText = "position:fixed; top:"+(window.innerHeight/2-60)+"px; left:"+(window.innerWidth/2-140)+"px;-webkit-transform:scale3d(0.5,0.5,1); -webkit-transition:all 0.4s;-webkit-border-radius:15px;z-index:10000; background:rgba(0,0,0,0.7);";
                 mask.style.cssText = "position:fixed; top:0; left:0; width:100%; height:1000px; background:rgba(0,0,0,0.1);z-index:9999;";
                 mask.addEventListener("touchmove",function(e){
                     e.preventDefault();
