@@ -47,6 +47,8 @@
 					    self._buildRelationIscroll();
 					}
 				}
+				//预处理后面的图片，如果是小图，则删除该数据
+                self._preLoadPics();
 				if(!self.loadBlock){
                     endPosition = (gallery.options.numberOfPages)*gallery.pageWidth;
                     self.loadBlock = loadBlock = document.createElement("div");
@@ -80,6 +82,9 @@
 						}catch(e){}
 					}
 					gallery.masterPages[gallery.currentMasterPage].style.visibility = "visible";
+					//预处理后面的图片，如果是小图，则删除该数据
+					self._preLoadPics();
+					
 				});
 				gallery.onMaxMove = function(x){
 				    if(!View.isLastPage){
@@ -106,6 +111,28 @@
 					
 				});
 			}
+		},
+		//预加载并删除小图
+		_preLoadPics:function(){
+		    var self = this,
+		    data = self.picData,
+		    gallery = self.swipe,
+		    page = gallery.page+2,
+		    img = new Image();
+		    if(!data[page])return;
+		    img.onload = function(){
+		        if(img.height<180||img.width<180){
+		            data.splice(page,1);
+		        }
+		        self.updataDataLength(data.length);
+		    }
+		    img.onerror = function(){
+                data.splice(page,1);
+                self.updataDataLength(data.length);
+            }
+            img.src = data[page].img+"_670x670.jpg";
+		    
+		    
 		},
 		_buildRelationIscroll:function(){
 		    var self = this,
@@ -225,7 +252,12 @@
 		 * 更新数据长度
 		 */
 		updataDataLength:function(n){
+		    var gallery = this.swipe,
+		    endPosition = n*gallery.pageWidth;
 		    this.swipe.updatePageCount(n);
+		    if(this.loadBlock&&this.loadBlock.style)
+		      console.log(n);
+		      this.loadBlock.style.cssText = "-webkit-transform:translate3d("+endPosition+"px,0,0)";
 		},
 		/**
 		 * 显示下一张
