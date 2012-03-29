@@ -255,9 +255,10 @@
 		    var gallery = this.swipe,
 		    endPosition = n*gallery.pageWidth;
 		    this.swipe.updatePageCount(n);
+		    try{
 		    if(this.loadBlock&&this.loadBlock.style)
-		      console.log(n);
 		      this.loadBlock.style.cssText = "-webkit-transform:translate3d("+endPosition+"px,0,0)";
+		     }catch(e){}
 		},
 		/**
 		 * 显示下一张
