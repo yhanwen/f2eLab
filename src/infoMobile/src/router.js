@@ -54,6 +54,8 @@ Router = (function(){
 				self.setHash(userData.get("index"));
 			}
 			Control[cfg[params[0]]](params);
+			//初始化提示
+			TipShow.init();
 		},
 		setHash:function(str){
 			this.oldHash = loc.hash;

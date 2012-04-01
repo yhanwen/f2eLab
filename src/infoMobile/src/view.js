@@ -83,7 +83,7 @@
                 link.href = location.hash;
                 btn.className = "backbtn head-hidden";
                 if (logo.className.indexOf("head-hidden") > 0) logo.className = "logo";
-                curTab.setAttribute("class", "");
+                curTab.className="";
                 headTabs[n - 1].className = "cur";
             } else {
                 //设置并显示返回按钮
@@ -99,7 +99,7 @@
                 if (n == "list") {
                     link.href = "#"+userData.get("index");
                 }
-                btn.className = "backbtn";
+                if (btn.className.indexOf("head-hidden") > 0) btn.className = "backbtn";
                 logo.className = "logo head-hidden";
             }
             if(layout.scroll)layout._hideHead();
@@ -110,9 +110,7 @@
             firstLoad  = false;
             //初始化全局变量（详情的标题容器，滚动事件）
             this._removeDetailTitle();
-            //清空固定标题
-            _fixTitleWrapper.innerHTML = "";
-            _fixTitleWrapper.style.webkitTransform="translate3d(0,0,0)";
+            
             this.onScrollMove = function() {};
             /**
              * 初始化用户参数（以后使用本地存储来保存手机用户数据）
@@ -135,13 +133,17 @@
          */
         buildNewPage: function(fn) {
             var page = doc.createElement("div"),
-            oldPage = _wrapper.querySelector(".switch-block");
+            oldPage = _wrapper.querySelector(".switch-block"),
+            back = doc.querySelector(".J_cancleLoading");
+            //删除取消按钮
+            if(back){
+                back.parentNode.removeChild(back);
+            }
             //layout._hideHead();
             page.className = "switch-block";
             page.style.cssText = "top:0; left:0; width:100%; position:absolute";
-            page.style.zIndex = -1;
-            page.style.opacity = 0;
-            layout.scroll&&(page.style.webkitTransform = "scale3d(1.2,1.2,1) translate3d(0,"+(-layout.scroll.y)+"px,0)");
+            page.style.zIndex=-1;
+            layout.scroll&&(page.style.webkitTransform = "translate3d("+(_wrapper.clientWidth)+"px,"+(-layout.scroll.y)+"px,0)");
             //清空固定标题位置相关的变量和容器
             listObjArr = [];
 
@@ -153,50 +155,44 @@
         showNewPage: function(page, fn) {
             var self = this,
             oldPage;
-            page.addEventListener("webkitTransitionEnd",
-            function() {},
-            false);
-
+        
             setTimeout(function() {
                 oldPage = _wrapper.querySelectorAll(".switch-block");
-                if (oldPage[1]) oldPage[0].style.zIndex = "-1";
-                page.style.zIndex = 1000;
-                if (popBigPicWrap) {
-                    _wrapper.style.zIndex = 100000;
-                    if (oldPage[1]) _wrapper.removeChild(oldPage[0]);
-                }
-                //返回页面顶部
-                //if (!oldPage[1])self._scrollToTop(page);
                 
-
-                page.style.webkitTransition = "all 0.4s";
+                if (oldPage[1]) oldPage[0].style.zIndex = "-1";
+                
+                page.style.zIndex = 10000;
+                page.style.webkitTransition = "all 0.3s";
                 setTimeout(function() {
 
-                    page.style.webkitTransform = "scale3d(1,1,1)";
-                    page.style.opacity = 1;
-                    self._scrollToTop(page);
+                    layout.scroll&&(page.style.webkitTransform = "translate3d(0px,"+(-layout.scroll.y)+"px,0)");
+                    
                     setTimeout(function() {
                         page.style.webkitTransition = "all 0s";
-                        if (oldPage[1]) ! popBigPicWrap && _wrapper.removeChild(oldPage[0]);
+                        if (oldPage[1]) _wrapper.removeChild(oldPage[0]);
                         page.style.position = "relative";
                         self._scrollToTop(page);
+                        page.style.webkitTransform = "translate3d(0px,0,0)";
+                        //清空固定标题
+                        _fixTitleWrapper.innerHTML = "";
+                        _fixTitleWrapper.style.webkitTransform="translate3d(0,0,0)";
                         //清除弹出大图
-                        if (popBigPicWrap) {
-                            popBigPicWrap.parentNode.removeChild(popBigPicWrap);
-                            popBigPicWrap = null;
-                        }
+                        
                         page.style.zIndex = 0;
                         _wrapper.style.zIndex = 0;
                         self.hideLoading();
                         layout._resize();
+                        self._scrollToTop(page);
+                        //展示提示
+                        TipShow.showTip();
                         fn && fn();
                     },
-                    600);
+                    400);
                 },
-                40);
+                20);
 
             },
-            300)
+            400)
 
         },
         /**
@@ -224,14 +220,18 @@
                 for (i in data.list) {
                     self._renderScrollList(data.list[i], page,i);
                 }
-                DA.getIndexScrollData(indexReqList);
-                self.showNewPage(page);
+                DA.getIndexScrollData(indexReqList,function(){
+                    self.showNewPage(page,function(){
+                        _curTitle = 0;
+                        self.onScrollMove = function() {
+                            location.href.indexOf("index") > 0 && View.fixListTitle();
+                        }
+                    });
+                });
+                
             },
             0);
-            _curTitle = 0;
-            self.onScrollMove = function() {
-                location.href.indexOf("index") > 0 && View.fixListTitle();
-            }
+            
         },
         /**
          * 渲染水平列表块
@@ -308,8 +308,21 @@
             var self = this,
             isScroll = false,
             item = doc.createElement("li"),
-            template = '<a href="#' + data["publishUrl"].substr(1) + '"><img src="' + data["pic"] + "_160x160.jpg" + '"/></a>';
-            item.innerHTML = template;
+            template = '<a href="#' + data["publishUrl"].substr(1) + '"><img src="' + data["pic"] + "_250x250.jpg" + '"/></a>';
+            item.innerHTML = template,
+            el = item.querySelector("img");
+            function resize(el){
+                var minW = 140,
+                    minH = 190,
+                    pScale = minW/minH,
+                    scale = el.width/el.height,
+                    width = scale>pScale?(scale<1.4*pScale?minH*scale:minW):minW,
+                    height = scale<=pScale?minW/scale:(scale<1.4*pScale?minH:minW/scale);
+                    el.style.cssText = "width:"+width+"px; height:"+height+"px; margin-top:"+((minH-height)/2)+"px; margin-left:"+((minW-width)/2)+"px;";
+                el.onload = function(){
+                    resize(this);
+                }
+            }
             
             //发生点击时记录位置
             item.addEventListener("touchstart",function(){
@@ -328,6 +341,8 @@
                 wrap.parentNode.style.opacity=0;
             });         
             wrap.appendChild(item);
+            resize(el);
+            
         },
         /**
          * 加载更多列表内容
@@ -685,8 +700,9 @@
                     back.href = "javascript:history.go(-1)";
                     back.className = "J_cancleLoading";
                     back.innerHTML = "取消";
-                    back.style.cssText = "position:fixed; width:80px; height:40px; line-height:40px; -webkit-border-radius:5px;background:rgba(0,0,0,0.6); color:#fff; font-size:14px; text-align:center;left:"+(window.innerWidth/2-40)+"px;top:"+(window.innerHeight/2+140)+"px;z-index:10000;";
-                    setTimeout(function(){if(!pageLoaded)doc.body.appendChild(back);},4000);
+                    back.style.cssText = "display:none;position:fixed; width:80px; height:40px; line-height:40px; -webkit-border-radius:5px;background:rgba(0,0,0,0.6); color:#fff; font-size:14px; text-align:center;left:"+(window.innerWidth/2-40)+"px;top:"+(window.innerHeight/2+140)+"px;z-index:10000;";
+                    doc.body.appendChild(back);
+                    setTimeout(function(){if(!pageLoaded)back.style.display="block"},4000);
                 }
                 mask.className="J_loadingMask";
                 doc.body.appendChild(tag);

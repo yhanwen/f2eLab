@@ -39,7 +39,7 @@ dataAccess = {
 		};
 		oldData = self.useLocalData(url,self.indexListHandler);
 	},
-	getIndexScrollData:function(reqList){
+	getIndexScrollData:function(reqList,fn){
 	    var self = this,
         cur = 0,
         oldData;
@@ -53,6 +53,8 @@ dataAccess = {
             cur++;
             if(reqList[cur])
                 oldData = self.useLocalData(reqList[cur].url,self.listDataHandle);
+            else
+                fn&&fn();
         }
         oldData = self.useLocalData(reqList[cur].url,self.listDataHandle);
 	},

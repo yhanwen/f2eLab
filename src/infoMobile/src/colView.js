@@ -94,14 +94,21 @@
 				self._showLoading(span);
 				el.src="";
 				el.onload = function () { 
+					var minW = span.clientWidth,
+					minH = span.clientHeight,
+					pScale = minW/minH,
+					scale = el.width/el.height,
+					width = scale>pScale?(scale<1.4*pScale?minH*scale:minW):minW,
+					height = scale<=pScale?minW/scale:(scale<1.4*pScale?minH:minW/scale);
+					el.style.cssText = "width:"+width+"px; height:"+height+"px; margin-top:"+((minH-height)/2)+"px; margin-left:"+((minW-width)/2)+"px;";
 					self._hideLoading(span);
-		
+		            
 				}
 				el.onerror = function () { 
 					self._hideLoading(span);
 	
 				}
-				el.src = slides[i].pic+"_160x160.jpg";
+				el.src = slides[i].pic+"_250x250.jpg";
 				
 				span.addEventListener("touchmove",function(e){
 					isShow = false;
