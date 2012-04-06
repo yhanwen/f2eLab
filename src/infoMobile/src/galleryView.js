@@ -167,35 +167,39 @@
 			realImg.style.display="none";
 			//el.style.webkitTransition = "all 0s";
 			self._showLoading(span,true);
-			el.src="";
 			el.style.opacity = 0;
 			realImg.style.opacity = 0;
-			loadHandler = function (e) { 
-				var that = e.currentTarget;
+			function setImg() { 
+				var that = el;
 				//that.style.cssText = "-webkit-transform:translate3d("+((viewWidth-that.clientWidth)/2)+"px,"+((viewHeight-that.clientHeight)/2)+"px,0)";
 				setTimeout(function(){
-					
-					
 					that.style.cssText = "position:absolute;top:50%; left:50%; margin:-"+(that.clientHeight/2)+"px -"+(that.clientWidth/2)+"px auto;"
 					that.style.opacity = 1;
 					that.className = "xxx";
 				},10);
 					
 			};
-			el.onload = loadHandler;
+			el.onload = setImg;
 			el.src = slides[i].img+"_60x60.jpg";
-			realImg.onload = function(e){
-			    var that = e.currentTarget;
-			    self._hideLoading(span);
-			    realImg.style.display="block";
-			    span.removeChild(el);
-			    setTimeout(function(){
-        			    that.style.cssText = "position:absolute;top:50%; left:50%; margin:-"+(that.clientHeight/2)+"px -"+(that.clientWidth/2)+"px auto;"
+			if(el.width&&el.height){
+			    setImg();
+			}
+			function setReal(){
+			    var that = realImg;
+                self._hideLoading(span);
+                realImg.style.display="block";
+                try{span.removeChild(el);}catch(e){}
+                setTimeout(function(){
+                        that.style.cssText = "position:absolute;top:50%; left:50%; margin:-"+(that.clientHeight/2)+"px -"+(that.clientWidth/2)+"px auto;"
                         that.style.opacity = 1;
                         that.className = "xxx";
                 },10);
 			}
+			realImg.onload = setReal;
 			realImg.src = slides[i].img+"_670x670.jpg";
+			if(realImg.width&&realImg.height){
+			    setReal();
+			}
 			return span;
 		},
 		_showLoading:function(obj,flag){

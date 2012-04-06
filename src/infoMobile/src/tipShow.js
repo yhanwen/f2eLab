@@ -2,30 +2,30 @@ TipShow = {
     pages:{
         "index":{
             tip1:{
-                img:"http://img04.taobaocdn.com/tps/i4/T1nAq5XhXpXXXXXXXX-554-109.png",
+                img:"http://img04.taobaocdn.com/tps/i4/T1kLe7XjJfXXXXXXXX-530-90.png",
                 style:{
-                    left:"37px",
-                    top:"142px",
-                    width:"277px",
-                    height:"54.5px"
+                    left:"34px",
+                    top:"135px",
+                    width:"265px",
+                    height:"45px"
                 }
             },
             tip2:{
-                img:"http://img03.taobaocdn.com/tps/i3/T1X7q5XhJpXXXXXXXX-265-265.png",
+                img:"http://img02.taobaocdn.com/tps/i2/T1zfe7XjdfXXXXXXXX-355-128.png",
                 style:{
-                    right:"-5px",
-                    top:"265px",
-                    width:"132.5px",
-                    height:"132.5px"
+                    right:"-2px",
+                    top:"271px",
+                    width:"177.5px",
+                    height:"64px"
                 }
             },
             btn:{
-                img:"http://img02.taobaocdn.com/tps/i2/T147m5XiXpXXXXXXXX-284-112.png",
+                img:"http://img01.taobaocdn.com/tps/i1/T1sLe7XjtfXXXXXXXX-203-87.png",
                 style:{
-                    left:"31px",
-                    top:"316px",
-                    width:"142px",
-                    height:"56px"
+                    left:"190px",
+                    top:"355px",
+                    width:"101.5px",
+                    height:"43.5px"
                 }
             }
         }
@@ -51,6 +51,9 @@ TipShow = {
                 self.curPage = k;
             }
         }
+        if(!self.curPage){
+            return;
+        }
         if(localData.get(self.curPage+"tip")=="shown"){
             return;
         }
@@ -68,14 +71,20 @@ TipShow = {
             }
             self.curTips.push(tip);
             if(k == "btn"){
-                tip.addEventListener("click",function(){
-                    self.hideTip();
-                },false);
+                
             }
         }
+        self.mask.addEventListener("click",function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            self.hideTip();
+        },false);
     },
     "showTip":function(){
         var self = this;
+        if(!self.curPage){
+            return;
+        }
         if(localData.get(self.curPage+"tip")=="shown"){
             return;
         }

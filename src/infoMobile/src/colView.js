@@ -92,24 +92,29 @@
 				el = img;
 				el.style.webkitTransform="translate3d(0,0,0)";
 				self._showLoading(span);
-				el.src="";
+				el.src = slides[i].pic+"_250x250.jpg";
+				function setImg(){
+				    var minW = span.clientWidth,
+                    minH = span.clientHeight,
+                    pScale = minW/minH,
+                    scale = el.width/el.height,
+                    width = scale>pScale?(scale<1.4*pScale?minH*scale:minW):minW,
+                    height = scale<=pScale?minW/scale:(scale<1.4*pScale?minH:minW/scale);
+                    el.style.cssText = "width:"+width+"px; height:"+height+"px; margin-top:"+((minH-height)/2)+"px; margin-left:"+((minW-width)/2)+"px;";
+                    self._hideLoading(span);
+				}
+				
 				el.onload = function () { 
-					var minW = span.clientWidth,
-					minH = span.clientHeight,
-					pScale = minW/minH,
-					scale = el.width/el.height,
-					width = scale>pScale?(scale<1.4*pScale?minH*scale:minW):minW,
-					height = scale<=pScale?minW/scale:(scale<1.4*pScale?minH:minW/scale);
-					el.style.cssText = "width:"+width+"px; height:"+height+"px; margin-top:"+((minH-height)/2)+"px; margin-left:"+((minW-width)/2)+"px;";
-					self._hideLoading(span);
-		            
+					setImg();
 				}
 				el.onerror = function () { 
 					self._hideLoading(span);
 	
 				}
-				el.src = slides[i].pic+"_250x250.jpg";
 				
+				if(el.width&&el.height){
+                    setTimeout(function(){setImg();},10);
+                }
 				span.addEventListener("touchmove",function(e){
 					isShow = false;
 				},false);

@@ -187,7 +187,7 @@
                         TipShow.showTip();
                         fn && fn();
                     },
-                    400);
+                    600);
                 },
                 20);
 
@@ -352,38 +352,49 @@
             var scroller = _wrapper,
             scrollTop,
             loadBox = doc.createElement("div");
-            loadBox.className = "text-loading-box";
-            loadBox.innerHTML = "正在载入更多...";
+            loadBox.className = "text-loading-box btn-loading-box";
+            loadBox.innerHTML = "点击载入更多";
+            loadBox.addEventListener("click",function(e){
+               loadMore(); 
+            });
+            function loadMore(){
+                if(self.loadingMoreList){
+                    return;
+                }
+                if(self.curListItemNum<items.length-1){
+                    var cur = self.curListItemNum,i;
+                    for(i = cur+1 ; i<Math.min(items.length,cur+11); i++){
+                        self.curListItemNum = i;
+                        self._renderListItem(items[i], listWrap);
+                    }
+                    return;
+                }
+                self.loadingMoreList = true;
+                loadBox.innerHTML = "正在载入更多...";
+                DA.getMoreListContent(function(data){
+                    self.curListPage = parseInt(data["currentpage"]);
+                    self.loadingMoreList = false;
+                    loadBox.innerHTML = "点击载入更多";
+                    // if(loadBox&&loadBox.parentNode){
+                        // loadBox.parentNode.removeChild(loadBox);
+                        // loadBox = null;
+                    // }
+                    for (i in data.items) {
+                        self._renderListItem(data.items[i], listWrap);
+                    }
+                    
+                });
+            }
             page.appendChild(loadBox);
-            self.onScrollMove = function(y){
+            /*self.onScrollMove = function(y){
                 if (layout.scroll) return;
                 if(!self.isLastPage){
                     scrollTop = y;
                     if(scroller.clientHeight-scrollTop<(window.innerHeight+20)&&! self.loadingMoreList){
-                        if(self.curListItemNum<items.length-1){
-                            var cur = self.curListItemNum,i;
-                            for(i = cur+1 ; i<Math.min(items.length,cur+11); i++){
-                                self.curListItemNum = i;
-                                self._renderListItem(items[i], listWrap);
-                            }
-                            return;
-                        }
-                        self.loadingMoreList = true;
-                        DA.getMoreListContent(function(data){
-                            self.curListPage = parseInt(data["currentpage"]);
-                            self.loadingMoreList = false;
-                            // if(loadBox&&loadBox.parentNode){
-                                // loadBox.parentNode.removeChild(loadBox);
-                                // loadBox = null;
-                            // }
-                            for (i in data.items) {
-                                self._renderListItem(data.items[i], listWrap);
-                            }
-                            
-                        });
+                        
                     }
                 }
-            }
+            }*/
             
             
             
